@@ -422,6 +422,48 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   font-size:11px;color:var(--tx3);margin-top:6px;font-style:italic;line-height:1.5;
 }
 
+/* ── Adaptive session UI ──────────────────────────────── */
+.study-subhdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px 10px;flex-shrink:0;
+}
+.q-type-badge{
+  font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;
+  background:var(--s2);color:var(--tx3);border:1px solid var(--bd);
+}
+.sess-streak{
+  font-size:13px;font-weight:800;color:var(--warn);
+  transition:opacity .3s ease;
+}
+.continue-wrap{
+  padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 20px);
+  flex-shrink:0;
+}
+.continue-btn{
+  width:100%;height:54px;
+  background:var(--s2);color:var(--tx2);
+  border:1.5px solid var(--bd2);
+  border-radius:16px;font-size:15px;font-weight:800;
+  transition:transform .25s var(--spring),opacity .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.continue-btn:active{transform:scale(.97);opacity:.9}
+.speed-cta{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 24px;margin:8px 20px 0;
+  background:var(--warn-dim);border:1px solid rgba(251,191,36,.2);
+  border-radius:14px;
+  font-size:14px;font-weight:800;color:var(--warn);letter-spacing:-.01em;
+  transition:transform .25s var(--spring),opacity .15s;
+  -webkit-user-select:none;user-select:none;width:calc(100% - 40px);cursor:pointer;
+}
+.speed-cta:active{transform:scale(.97);opacity:.9}
+.wrong-requeue-note{
+  font-size:11px;font-weight:700;color:var(--err);text-align:center;
+  margin-bottom:8px;letter-spacing:.02em;
+}
+
 /* ── Reduced motion ───────────────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -459,11 +501,12 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   </div>
 
   <div class="cta-wrap">
-    <button class="study-cta" id="ctaMain" onclick="openModeScreen(null)">
+    <button class="study-cta" id="ctaMain" onclick="startSession(null)">
       <span id="ctaText">Start learning</span>
       <span class="cta-arrow">→</span>
     </button>
   </div>
+  <button class="speed-cta" onclick="startSpeed()">⚡ Speed Challenge — 60 sec blitz</button>
 
   <div class="science-note">
     <span class="science-icon">🧠</span>
@@ -475,67 +518,6 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 
   <div class="sec-lbl">Study by topic</div>
   <div class="cat-grid" id="catGrid"></div>
-</div>
-
-
-<!-- ════════════════════════════════════════════════════════
-     MODE PICKER
-════════════════════════════════════════════════════════ -->
-<div id="sMode" class="scr">
-
-  <div class="mode-hdr">
-    <button class="back-btn" onclick="goHome()">✕</button>
-    <div class="mode-hdr-title">Choose a study mode</div>
-  </div>
-  <div class="mode-subtitle">Research shows typing &amp; gap-fill produce 2.5× better retention than multiple choice.</div>
-
-  <div class="mode-grid">
-
-    <!-- Flashcard (classic) -->
-    <div class="mode-card full ac-card" onclick="launchMode('flip')">
-      <span class="mode-em">🃏</span>
-      <div style="flex:1">
-        <div class="mode-name">Flashcard</div>
-        <div class="mode-desc">Flip to reveal the answer, then rate yourself</div>
-      </div>
-      <span class="mode-badge badge-ac ml-auto">Classic</span>
-    </div>
-
-    <!-- 4-Choice -->
-    <div class="mode-card" onclick="launchMode('choice')">
-      <span class="mode-em">🎯</span>
-      <span class="mode-badge badge-ok">Easier</span>
-      <div class="mode-name">4-Choice</div>
-      <div class="mode-desc">See English, pick the right Italian from 4 options</div>
-    </div>
-
-    <!-- Fill the Gap -->
-    <div class="mode-card" onclick="launchMode('gap')">
-      <span class="mode-em">📝</span>
-      <span class="mode-badge badge-err">Harder</span>
-      <div class="mode-name">Fill the Gap</div>
-      <div class="mode-desc">Complete the example sentence</div>
-    </div>
-
-    <!-- Type It -->
-    <div class="mode-card" onclick="launchMode('type')">
-      <span class="mode-em">⌨️</span>
-      <span class="mode-badge badge-err">Hardest</span>
-      <div class="mode-name">Type It</div>
-      <div class="mode-desc">See English, type the full Italian from memory</div>
-    </div>
-
-    <!-- Speed Round -->
-    <div class="mode-card full warn-card" onclick="launchMode('speed')">
-      <span class="mode-em">⚡</span>
-      <div style="flex:1">
-        <div class="mode-name">Speed Round</div>
-        <div class="mode-desc">60-second blitz through all 100 words — how many can you get?</div>
-      </div>
-      <span class="mode-badge badge-warn ml-auto">Timed</span>
-    </div>
-
-  </div>
 </div>
 
 
@@ -552,6 +534,11 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
     <div class="prog-lbl" id="progLbl">0 / 0</div>
   </div>
 
+  <div class="study-subhdr">
+    <span class="q-type-badge" id="qTypeBadge"></span>
+    <span class="sess-streak" id="sessStreak" style="opacity:0">🔥 0</span>
+  </div>
+
   <!-- Speed timer (speed mode only) -->
   <div class="timer-wrap" id="timerWrap">
     <div class="timer-top-row">
@@ -564,7 +551,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   </div>
 
   <!-- Flip card (classic flashcard mode) -->
-  <div class="card-scene" id="cardScene" onclick="flipCard()">
+  <div class="card-scene" id="cardScene" style="display:none">
     <div class="card-wrap" id="cardWrap">
 
       <!-- Front -->
@@ -620,23 +607,10 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
     <div class="choice-grid" id="choiceGrid"></div>
   </div>
 
-  <!-- Answer buttons (flip mode + input mode after submit) -->
-  <div class="answer-wrap" id="answerWrap">
-    <div class="answer-hint">How well did you know it?</div>
-    <div class="answer-row">
-      <button class="answer-btn btn-miss" onclick="answer(1)">
-        <span class="ab-icon">✕</span>
-        <span class="ab-lbl">Missed</span>
-      </button>
-      <button class="answer-btn btn-almost" onclick="answer(3)">
-        <span class="ab-icon">≈</span>
-        <span class="ab-lbl">Almost</span>
-      </button>
-      <button class="answer-btn btn-got" onclick="answer(5)">
-        <span class="ab-icon">✓</span>
-        <span class="ab-lbl">Got it!</span>
-      </button>
-    </div>
+  <!-- Continue button (shown after wrong answer) -->
+  <div class="continue-wrap" id="continueWrap" style="display:none">
+    <div class="wrong-requeue-note" id="requeueNote"></div>
+    <button class="continue-btn" onclick="continueSession()">Next →</button>
   </div>
 
 </div>
@@ -843,51 +817,55 @@ function sm2(prev, q){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MODE STATE
-═══════════════════════════════════════════════════════════ */
-var currentMode = 'flip';
-var pendingCat  = null;
-
-/* ═══════════════════════════════════════════════════════════
    SESSION STATE
 ═══════════════════════════════════════════════════════════ */
-var sess    = {queue:[], idx:0, got:0, almost:0, missed:0};
-var flipped = false;
+// sess.queue holds {card, type} items. Wrong answers are re-queued as 'choice'.
+var sess = { queue:[], cleared:0, sessionTotal:0, got:0, missed:0, retries:{}, streak:0 };
 
-/* ═══════════════════════════════════════════════════════════
-   SPEED ROUND STATE
-═══════════════════════════════════════════════════════════ */
+/* Speed round */
 var speedTimerId  = null;
 var speedTimeLeft = 60;
 var speedCorrect  = 0;
 var speedTotal    = 0;
+var speedIdx      = 0;
 var SPEED_SECS    = 60;
+
+/* ═══════════════════════════════════════════════════════════
+   QUESTION TYPE ASSIGNMENT
+═══════════════════════════════════════════════════════════ */
+function getQuestionType(card, state, forceEasy){
+  if(forceEasy) return 'choice';
+  var s    = state[card.id];
+  var reps = s ? (s.reps || 0) : 0;
+  if(reps === 0) return 'choice';                          // brand new → easiest
+  if(reps === 1) return 'gap';                             // seen once → medium
+  if(reps === 2) return Math.random() < 0.5 ? 'gap' : 'type';
+  return 'type';                                           // well known → hardest
+}
 
 /* ═══════════════════════════════════════════════════════════
    QUEUE BUILDING
 ═══════════════════════════════════════════════════════════ */
-function buildQueue(filterCat){
-  var now = Date.now();
-  var state = loadState();
+function buildAdaptiveQueue(filterCat){
+  var now=Date.now(), state=loadState();
   var reviews=[], newCards=[], future=[];
   WORDS.forEach(function(w){
     if(filterCat && w.cat !== filterCat) return;
-    var s = state[w.id];
+    var s=state[w.id];
     if(s && s.due && s.due <= now) reviews.push(w);
     else if(!s)                    newCards.push(w);
     else                           future.push(w);
   });
   shuffle(reviews); shuffle(newCards);
   var maxNew = filterCat ? newCards.length : Math.min(NEW_LIMIT, newCards.length);
-  var queue  = reviews.concat(newCards.slice(0, maxNew));
-  if(filterCat && queue.length === 0){ shuffle(future); return future; }
-  return queue;
+  var cards  = reviews.concat(newCards.slice(0, maxNew));
+  if(filterCat && cards.length === 0){ shuffle(future); cards = future; }
+  return cards.map(function(c){ return { card:c, type:getQuestionType(c, state, false) }; });
 }
 
 function buildSpeedQueue(){
-  var all = WORDS.slice();
-  shuffle(all);
-  return all;
+  var all = WORDS.slice(); shuffle(all);
+  return all.map(function(c){ return { card:c, type:'choice' }; });
 }
 
 function shuffle(arr){
@@ -908,20 +886,6 @@ function goHome(){
   clearSpeedTimer();
   show('sHome');
   renderHome();
-}
-
-function openModeScreen(cat){
-  pendingCat = cat;
-  show('sMode');
-}
-
-function launchMode(mode){
-  currentMode = mode;
-  if(mode === 'speed'){
-    startSpeed();
-  } else {
-    startSession(pendingCat);
-  }
 }
 
 function exitStudy(){
@@ -964,7 +928,7 @@ function renderHome(){
     var catDue=words.filter(function(w){ var s=state[w.id]; return s&&s.due<=now; }).length;
     var catNew=words.filter(function(w){ return !state[w.id]; }).length;
     var catLearned=words.length-catNew;
-    html+='<div class="cat-card'+(catDue>0?' has-due':'')+'" onclick="openModeScreen(\''+key+'\')">'
+    html+='<div class="cat-card'+(catDue>0?' has-due':'')+'" onclick="startSession(\''+key+'\')">'
       +'<span class="cat-em">'+cat.em+'</span>'
       +'<span class="cat-name">'+cat.name+'</span>'
       +'<span class="cat-prog">'+catLearned+' / '+words.length+'</span>'
@@ -975,110 +939,196 @@ function renderHome(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   STUDY SESSION
+   ADAPTIVE SESSION
 ═══════════════════════════════════════════════════════════ */
 function startSession(filterCat){
-  var queue = buildQueue(filterCat);
+  var queue = buildAdaptiveQueue(filterCat);
   if(!queue.length) return;
-  sess.queue=queue; sess.idx=0; sess.got=0; sess.almost=0; sess.missed=0;
+
+  sess.queue        = queue;
+  sess.cleared      = 0;
+  sess.sessionTotal = queue.length;
+  sess.got          = 0;
+  sess.missed       = 0;
+  sess.retries      = {};
+  sess.streak       = 0;
+
   show('sStudy');
-  setupStudyUI();
-  showCardForMode();
-}
-
-function setupStudyUI(){
-  var mode = currentMode;
-  var isFlip   = mode === 'flip';
-  var isInput  = mode === 'type' || mode === 'gap';
-  var isChoice = mode === 'choice' || mode === 'speed';
-
-  document.getElementById('cardScene').style.display  = isFlip   ? '' : 'none';
-  document.getElementById('inputPanel').style.display = isInput  ? 'flex' : 'none';
-  document.getElementById('choicePanel').style.display= isChoice ? 'flex' : 'none';
-  document.getElementById('answerWrap').classList.remove('show');
   document.getElementById('timerWrap').classList.remove('show');
-
-  if(isInput){
-    document.getElementById('inputModeLbl').textContent =
-      mode === 'gap' ? 'Complete the sentence' : 'Translate to Italian';
-    document.getElementById('choiceModeLbl').textContent = '';
-  }
-  if(mode === 'choice'){
-    document.getElementById('choiceModeLbl').textContent = 'What is this in Italian?';
-  }
+  showCurrentItem();
 }
 
-function showCardForMode(){
-  var card = sess.queue[sess.idx];
-  if(!card){ endSession(); return; }
-  if(currentMode === 'flip')         showFlipCard(card);
-  else if(currentMode === 'type')    showTypeCard(card);
-  else if(currentMode === 'gap')     showGapCard(card);
-  else if(currentMode === 'choice')  showChoiceCard(card, false);
+function showCurrentItem(){
+  var item = sess.queue[0];
+  if(!item){ endSession(); return; }
+
+  var card=item.card, type=item.type;
+
+  document.getElementById('cardScene').style.display   = 'none';
+  document.getElementById('inputPanel').style.display  = 'none';
+  document.getElementById('choicePanel').style.display = 'none';
+  document.getElementById('continueWrap').style.display= 'none';
+
   updateProg();
+  updateSessionBadge(type);
+
+  if(type === 'choice')     showChoiceCard(card, false);
+  else if(type === 'gap')   showGapCard(card);
+  else                      showTypeCard(card);
 }
 
 function updateProg(){
-  var total = currentMode === 'speed' ? speedTotal : sess.queue.length;
-  var idx   = currentMode === 'speed' ? speedTotal : sess.idx;
-  var pct   = total > 0 ? (idx/total*100) : 0;
-  document.getElementById('progFill').style.width  = pct+'%';
-  document.getElementById('progLbl').textContent   = idx+' / '+total;
+  var pct = sess.sessionTotal > 0 ? (sess.cleared / sess.sessionTotal * 100) : 0;
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLbl').textContent  = sess.cleared + ' / ' + sess.sessionTotal;
 }
 
-/* ── Flip mode ────────────────────────────────────────── */
-function showFlipCard(card){
-  flipped = false;
-  document.getElementById('cardWrap').classList.remove('flipped');
-  document.getElementById('answerWrap').classList.remove('show');
-  var state=loadState(), isNew=!state[card.id], cat=CATS[card.cat]||{};
-  var badge=(cat.em||'')+' '+(cat.name||card.cat);
-  document.getElementById('cardBadge').textContent  = badge;
-  document.getElementById('cardBadge2').textContent = badge;
-  document.getElementById('cardWord').textContent   = card.it;
-  document.getElementById('cardPron').textContent   = '('+card.pron+')';
-  document.getElementById('cardEn').textContent     = card.en;
-  document.getElementById('cardPronBack').textContent = '('+card.pron+')';
-  document.getElementById('cardEg').textContent     = card.eg;
-  document.getElementById('cardEgEn').textContent   = card.egEn ? '→ '+card.egEn : '';
-  var noteEl = document.getElementById('cardNote');
-  if(card.note){ noteEl.textContent='💡 '+card.note; noteEl.style.display='block'; }
-  else { noteEl.style.display='none'; }
-  document.getElementById('newBadge').style.display = isNew ? 'block' : 'none';
+function updateSessionBadge(type){
+  var labels = { choice:'4 Choices', gap:'Fill the Gap', type:'Type It', speed:'Speed' };
+  document.getElementById('qTypeBadge').textContent = labels[type] || '';
+  var sEl = document.getElementById('sessStreak');
+  if(sess.streak >= 3){
+    sEl.textContent = '🔥 ' + sess.streak;
+    sEl.style.opacity = '1';
+  } else {
+    sEl.style.opacity = '0';
+  }
 }
 
-function flipCard(){
-  if(currentMode !== 'flip' || flipped) return;
-  flipped = true;
-  document.getElementById('cardWrap').classList.add('flipped');
-  document.getElementById('answerWrap').classList.add('show');
+/* ─── Correct ────────────────────────────────────────────── */
+function onCorrect(card){
+  var state = loadState();
+  state[card.id] = sm2(state[card.id] || {}, 5);
+  saveState(state);
+
+  sess.queue.shift();
+  sess.cleared++;
+  if(!sess.retries[card.id]) sess.got++;
+  sess.streak++;
+
+  setTimeout(function(){ showCurrentItem(); }, 700);
 }
 
-/* ── Type It mode ─────────────────────────────────────── */
+/* ─── Wrong ──────────────────────────────────────────────── */
+function onWrong(card){
+  var state = loadState();
+  state[card.id] = sm2(state[card.id] || {}, 1);
+  saveState(state);
+
+  sess.missed++;
+  sess.streak = 0;
+
+  var retries = (sess.retries[card.id] || 0) + 1;
+  sess.retries[card.id] = retries;
+
+  sess.queue.shift();
+
+  var noteEl = document.getElementById('requeueNote');
+  if(retries < 3){
+    sess.sessionTotal++;
+    sess.queue.push({ card:card, type:'choice' });
+    noteEl.textContent = '🔁 Added back to queue — you\'ll see this again';
+  } else {
+    noteEl.textContent = '📌 Keep practising — it\'ll come back tomorrow';
+  }
+
+  updateProg();
+  document.getElementById('continueWrap').style.display = 'flex';
+}
+
+function continueSession(){
+  document.getElementById('continueWrap').style.display = 'none';
+  showCurrentItem();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHOICE CARD
+═══════════════════════════════════════════════════════════ */
+function showChoiceCard(card, speedMode){
+  var panel = document.getElementById('choicePanel');
+  panel.style.display = 'flex';
+  document.getElementById('choiceModeLbl').textContent = speedMode ? '⚡ What is this in Italian?' : 'What is this in Italian?';
+  document.getElementById('choicePrompt').textContent  = card.en;
+
+  var pool = WORDS.filter(function(w){ return w.id !== card.id; });
+  shuffle(pool);
+  var options = [card].concat(pool.slice(0, 3));
+  shuffle(options);
+
+  var html = '';
+  options.forEach(function(opt, i){
+    var sp = speedMode ? ',true' : ',false';
+    html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+sp+')">'
+      + esc(opt.it) + '</button>';
+  });
+  document.getElementById('choiceGrid').innerHTML = html;
+}
+
+function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
+  var btns = document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
+  btns.forEach(function(b){ b.disabled = true; });
+
+  var isCorrect = (chosenId === correctId);
+  btns[btnIdx].classList.add(isCorrect ? 'correct' : 'wrong');
+
+  var card = getWordById(correctId);
+
+  if(!isCorrect){
+    btns.forEach(function(b){
+      if(b.textContent.trim() === card.it) b.classList.add('reveal');
+    });
+  }
+
+  if(speedMode){
+    speedTotal++;
+    if(isCorrect) speedCorrect++;
+    updateSpeedScore();
+    var pct2 = speedTotal > 0 ? Math.round(speedCorrect/speedTotal*100) : 0;
+    document.getElementById('progLbl').textContent = pct2 + '%';
+    setTimeout(function(){
+      if(!speedTimerId) return;
+      var state = loadState();
+      state[card.id] = sm2(state[card.id] || {}, isCorrect ? 5 : 1);
+      saveState(state);
+      speedAdv();
+    }, 450);
+  } else {
+    if(isCorrect) onCorrect(card);
+    else          onWrong(card);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TYPE IT CARD
+═══════════════════════════════════════════════════════════ */
 function showTypeCard(card){
-  document.getElementById('inputPanel').style.display = 'flex';
-  document.getElementById('inputPrompt').textContent  = card.en;
+  document.getElementById('inputPanel').style.display  = 'flex';
+  document.getElementById('inputModeLbl').textContent  = 'Translate to Italian';
+  document.getElementById('inputPrompt').textContent   = card.en;
   document.getElementById('gapSentence').style.display = 'none';
-  document.getElementById('gapHint').style.display   = 'none';
+  document.getElementById('gapHint').style.display     = 'none';
   document.getElementById('gapEgEn').classList.remove('show');
   document.getElementById('gapEgEn').textContent = '';
   resetInputPanel();
 }
 
-/* ── Fill the Gap mode ────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   FILL THE GAP CARD
+═══════════════════════════════════════════════════════════ */
 function showGapCard(card){
   document.getElementById('inputPanel').style.display = 'flex';
+  document.getElementById('inputModeLbl').textContent = 'Complete the sentence';
   document.getElementById('inputPrompt').textContent  = '';
 
   var hintEl = document.getElementById('gapHint');
-  hintEl.textContent = 'Missing word means: "' + card.en + '"';
+  hintEl.textContent  = 'Missing word means: "' + card.en + '"';
   hintEl.style.display = 'block';
 
   var gapEgEnEl = document.getElementById('gapEgEn');
   gapEgEnEl.textContent = card.egEn ? '→ ' + card.egEn : '';
   gapEgEnEl.classList.remove('show');
 
-  var gap = buildGapSentence(card);
+  var gap   = buildGapSentence(card);
   var gapEl = document.getElementById('gapSentence');
   gapEl.style.display = 'block';
   gapEl.innerHTML = gap;
@@ -1088,35 +1138,26 @@ function showGapCard(card){
 function buildGapSentence(card){
   var sentence = card.eg;
   var word     = card.it.replace(/[.?!…]+$/, '').trim();
-
   var re = new RegExp(escapeRe(word), 'i');
-  if(re.test(sentence)){
-    return sentence.replace(re, '<b>____</b>');
-  }
+  if(re.test(sentence)) return sentence.replace(re, '<b>____</b>');
   var parts = word.split(/\s+/).filter(function(w){ return w.length > 3; });
   for(var i=0; i<parts.length; i++){
     var re2 = new RegExp(escapeRe(parts[i]), 'i');
-    if(re2.test(sentence)){
-      return sentence.replace(re2, '<b>____</b>');
-    }
+    if(re2.test(sentence)) return sentence.replace(re2, '<b>____</b>');
   }
-  document.getElementById('inputPrompt').textContent = card.en;
+  document.getElementById('inputPrompt').textContent   = card.en;
   document.getElementById('gapSentence').style.display = 'none';
   return '';
 }
 
-function escapeRe(s){
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 function resetInputPanel(){
   var field = document.getElementById('typeField');
-  field.value = '';
-  field.className = 'type-field';
-  field.disabled = false;
+  field.value = ''; field.className = 'type-field'; field.disabled = false;
   document.getElementById('submitBtn').disabled = false;
   document.getElementById('inputReveal').classList.remove('show');
-  document.getElementById('answerWrap').classList.remove('show');
+  document.getElementById('continueWrap').style.display = 'none';
   setTimeout(function(){ field.focus(); }, 100);
 }
 
@@ -1125,14 +1166,14 @@ function onTypeInput(){
 }
 
 function submitTyped(){
-  var card   = sess.queue[sess.idx];
-  if(!card) return;
-  var field  = document.getElementById('typeField');
-  var typed  = field.value.trim();
+  var item = sess.queue[0];
+  if(!item) return;
+  var card  = item.card;
+  var field = document.getElementById('typeField');
+  var typed = field.value.trim();
   if(!typed) return;
 
-  var correct = card.it;
-  var isMatch = normalise(typed) === normalise(correct);
+  var isMatch = normalise(typed) === normalise(card.it);
 
   field.className = 'type-field ' + (isMatch ? 'correct' : 'wrong');
   field.disabled  = true;
@@ -1141,21 +1182,23 @@ function submitTyped(){
   var revealWord = document.getElementById('inputRevealWord');
   var revealNote = document.getElementById('inputRevealNote');
   var revealEg   = document.getElementById('inputRevealEg');
-  revealWord.textContent = correct;
+  revealWord.textContent = card.it;
   revealWord.className   = 'input-reveal-word' + (isMatch ? '' : ' miss');
   revealNote.textContent = isMatch ? 'Correct! ✓' : 'You typed: "' + typed + '"';
 
-  if(currentMode === 'type' && card.eg){
+  if(item.type === 'type' && card.eg){
     revealEg.textContent = card.eg + (card.egEn ? ' — ' + card.egEn : '');
   } else {
     revealEg.textContent = '';
   }
-  if(currentMode === 'gap'){
+  if(item.type === 'gap'){
     document.getElementById('gapEgEn').classList.add('show');
   }
 
   document.getElementById('inputReveal').classList.add('show');
-  document.getElementById('answerWrap').classList.add('show');
+
+  if(isMatch) onCorrect(card);
+  else        onWrong(card);
 }
 
 function normalise(s){
@@ -1165,145 +1208,48 @@ function normalise(s){
     .replace(/[.?!…]+$/, '');
 }
 
-/* ── 4-Choice mode ────────────────────────────────────── */
-function showChoiceCard(card, speedMode){
-  document.getElementById('choicePrompt').textContent = card.en;
-
-  var pool = speedMode
-    ? WORDS.filter(function(w){ return w.id !== card.id; })
-    : sess.queue.filter(function(w){ return w.id !== card.id; });
-
-  if(pool.length < 3){
-    pool = WORDS.filter(function(w){ return w.id !== card.id; });
-  }
-
-  shuffle(pool);
-  var distractors = pool.slice(0, 3);
-  var options = [card].concat(distractors);
-  shuffle(options);
-
-  var html = '';
-  options.forEach(function(opt, i){
-    html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+')">'
-      + esc(opt.it)
-      + '</button>';
-  });
-  document.getElementById('choiceGrid').innerHTML = html;
-}
-
-function chooseAnswer(btnIdx, correctId, chosenId){
-  var btns = document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
-  btns.forEach(function(b){ b.disabled = true; });
-
-  var isCorrect = (chosenId === correctId);
-
-  btns[btnIdx].classList.add(isCorrect ? 'correct' : 'wrong');
-
-  if(!isCorrect){
-    btns.forEach(function(b){
-      if(b.textContent.trim() === getWordById(correctId).it){
-        b.classList.add('reveal');
-      }
-    });
-  }
-
-  var q = isCorrect ? 5 : 1;
-
-  if(currentMode === 'speed'){
-    speedTotal++;
-    if(isCorrect) speedCorrect++;
-    updateSpeedScore();
-    updateProg();
-    setTimeout(function(){
-      var next = sess.queue[sess.idx];
-      if(!next) return;
-      var state = loadState();
-      state[next.id] = sm2(state[next.id]||{}, q);
-      saveState(state);
-      sess.idx++;
-      var nextCard = sess.queue[sess.idx];
-      if(nextCard){
-        showChoiceCard(nextCard, true);
-      }
-    }, 450);
-  } else {
-    setTimeout(function(){
-      var card = sess.queue[sess.idx];
-      if(!card) return;
-      var state = loadState();
-      state[card.id] = sm2(state[card.id]||{}, q);
-      saveState(state);
-      if(isCorrect) sess.got++; else sess.missed++;
-      sess.idx++;
-      showCardForMode();
-    }, 600);
-  }
-}
-
-function getWordById(id){
-  for(var i=0; i<WORDS.length; i++){ if(WORDS[i].id===id) return WORDS[i]; }
-  return WORDS[0];
-}
-
-function esc(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   ANSWER (flip + input modes)
-═══════════════════════════════════════════════════════════ */
-function answer(q){
-  var card = sess.queue[sess.idx];
-  if(!card) return;
-  if(currentMode === 'flip' && !flipped) return;
-
-  var state = loadState();
-  state[card.id] = sm2(state[card.id]||{}, q);
-  saveState(state);
-
-  if(q===5)       sess.got++;
-  else if(q===3)  sess.almost++;
-  else            sess.missed++;
-
-  sess.idx++;
-  showCardForMode();
-}
-
 /* ═══════════════════════════════════════════════════════════
    SPEED ROUND
 ═══════════════════════════════════════════════════════════ */
 function startSpeed(){
   var queue = buildSpeedQueue();
-  sess.queue=queue; sess.idx=0; sess.got=0; sess.almost=0; sess.missed=0;
-  speedTimeLeft=SPEED_SECS; speedCorrect=0; speedTotal=0;
+  sess.queue = queue;
+  speedIdx=0; speedTimeLeft=SPEED_SECS; speedCorrect=0; speedTotal=0;
 
   show('sStudy');
   document.getElementById('cardScene').style.display   = 'none';
   document.getElementById('inputPanel').style.display  = 'none';
   document.getElementById('choicePanel').style.display = 'flex';
-  document.getElementById('answerWrap').classList.remove('show');
+  document.getElementById('continueWrap').style.display= 'none';
   document.getElementById('choiceModeLbl').textContent = '⚡ What is this in Italian?';
   document.getElementById('timerWrap').classList.add('show');
   document.getElementById('progFill').style.width = '0%';
-  document.getElementById('progLbl').textContent  = '0 / 0';
+  document.getElementById('progLbl').textContent  = '0%';
+  document.getElementById('qTypeBadge').textContent = 'Speed';
+  document.getElementById('sessStreak').style.opacity = '0';
 
   updateSpeedTimer();
-  showChoiceCard(sess.queue[0], true);
+  showChoiceCard(sess.queue[0].card, true);
 
   speedTimerId = setInterval(function(){
     speedTimeLeft--;
     updateSpeedTimer();
-    if(speedTimeLeft <= 0){
-      clearSpeedTimer();
-      endSpeedRound();
-    }
+    if(speedTimeLeft <= 0){ clearSpeedTimer(); endSpeedRound(); }
   }, 1000);
+}
+
+function speedAdv(){
+  if(!speedTimerId) return;
+  speedIdx++;
+  var item = sess.queue[speedIdx];
+  if(!item) return;
+  showChoiceCard(item.card, true);
 }
 
 function updateSpeedTimer(){
   var pct = (speedTimeLeft / SPEED_SECS) * 100;
-  document.getElementById('timerFill').style.width   = pct + '%';
-  document.getElementById('timerCount').textContent  = '0:' + (speedTimeLeft < 10 ? '0' : '') + speedTimeLeft;
+  document.getElementById('timerFill').style.width  = pct + '%';
+  document.getElementById('timerCount').textContent = '0:' + (speedTimeLeft < 10 ? '0' : '') + speedTimeLeft;
   updateSpeedScore();
 }
 
@@ -1317,17 +1263,17 @@ function clearSpeedTimer(){
 
 function endSpeedRound(){
   var pct = speedTotal > 0 ? Math.round(speedCorrect/speedTotal*100) : 0;
-  document.getElementById('doneTitle').textContent   = 'Speed Round!';
-  document.getElementById('doneEm').textContent      = pct>=80?'🏆':pct>=50?'⚡':'💪';
-  document.getElementById('doneTotal').textContent   = speedTotal;
-  document.getElementById('doneGot').textContent     = speedCorrect;
-  document.getElementById('doneMissed').textContent  = speedTotal-speedCorrect;
-  document.getElementById('doneSub').textContent     = pct+'% accuracy in 60 seconds. '+(pct>=80?'Fantastico!':pct>=50?'Good effort!':'Keep practising!');
+  document.getElementById('doneTitle').textContent  = 'Speed Round!';
+  document.getElementById('doneEm').textContent     = pct>=80?'🏆':pct>=50?'⚡':'💪';
+  document.getElementById('doneTotal').textContent  = speedTotal;
+  document.getElementById('doneGot').textContent    = speedCorrect;
+  document.getElementById('doneMissed').textContent = speedTotal - speedCorrect;
+  document.getElementById('doneSub').textContent    = pct+'% accuracy in 60 seconds. '+(pct>=80?'Fantastico!':pct>=50?'Good effort!':'Keep practising!');
   show('sDone');
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DONE SCREEN (standard sessions)
+   DONE SCREEN
 ═══════════════════════════════════════════════════════════ */
 function endSession(){
   var today=todayStr(), streak=loadStreak();
@@ -1338,14 +1284,14 @@ function endSession(){
     saveStreak(streak);
   }
 
-  var total=sess.got+sess.almost+sess.missed;
-  var pct  =total>0 ? Math.round(sess.got/total*100) : 0;
+  var accuracy = (sess.got + sess.missed) > 0
+    ? Math.round(sess.got / (sess.got + sess.missed) * 100) : 100;
 
-  document.getElementById('doneTitle').textContent   = 'Session done!';
-  document.getElementById('doneEm').textContent      = pct>=80?'🎉':pct>=50?'💪':'📚';
-  document.getElementById('doneTotal').textContent   = total;
-  document.getElementById('doneGot').textContent     = sess.got;
-  document.getElementById('doneMissed').textContent  = sess.missed;
+  document.getElementById('doneTitle').textContent  = 'Session done!';
+  document.getElementById('doneEm').textContent     = accuracy>=80?'🎉':accuracy>=50?'💪':'📚';
+  document.getElementById('doneTotal').textContent  = sess.cleared;
+  document.getElementById('doneGot').textContent    = sess.got;
+  document.getElementById('doneMissed').textContent = sess.missed;
 
   var msgs=[
     'Spaced repetition works — your brain will consolidate these overnight.',
@@ -1356,6 +1302,18 @@ function endSession(){
   ];
   document.getElementById('doneSub').textContent = msgs[Math.floor(Math.random()*msgs.length)];
   show('sDone');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+function getWordById(id){
+  for(var i=0; i<WORDS.length; i++){ if(WORDS[i].id===id) return WORDS[i]; }
+  return WORDS[0];
+}
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 /* ═══════════════════════════════════════════════════════════
