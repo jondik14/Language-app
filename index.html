@@ -400,6 +400,28 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .done-btn:active{transform:scale(.97);opacity:.9}
 
+/* ── Card example translation + note ─────────────────── */
+.card-eg-en{font-size:11px;color:var(--tx3);text-align:center;margin-top:3px;line-height:1.5}
+.card-note{
+  font-size:11px;color:var(--ac-tx);text-align:center;line-height:1.55;
+  background:var(--ac-dim);border:1px solid rgba(242,100,25,.15);
+  border-radius:10px;padding:8px 12px;margin-top:4px;
+}
+
+/* ── Gap mode helpers ─────────────────────────────────── */
+.gap-hint{
+  font-size:13px;color:var(--tx2);text-align:center;font-weight:600;
+  padding:8px 14px;background:var(--s2);border-radius:12px;line-height:1.4;
+}
+.gap-eg-en{
+  display:none;font-size:12px;color:var(--tx3);text-align:center;
+  font-style:italic;margin-top:-4px;
+}
+.gap-eg-en.show{display:block}
+.input-reveal-eg{
+  font-size:11px;color:var(--tx3);margin-top:6px;font-style:italic;line-height:1.5;
+}
+
 /* ── Reduced motion ───────────────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -408,8 +430,11 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 </head>
 <body>
 
-<!-- HOME -->
+<!-- ════════════════════════════════════════════════════════
+     HOME
+════════════════════════════════════════════════════════ -->
 <div id="sHome" class="scr on">
+
   <div class="home-top">
     <div>
       <div class="home-eyebrow">Italy survival kit</div>
@@ -417,488 +442,925 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
     </div>
     <div class="streak-pill" id="streakPill">🔥 0</div>
   </div>
+
   <div class="stats-row">
-    <div class="stat-card"><div class="stat-val" id="statLearned">0</div><div class="stat-lbl">Learned</div></div>
-    <div class="stat-card"><div class="stat-val" id="statDue">0</div><div class="stat-lbl">Due today</div></div>
-    <div class="stat-card"><div class="stat-val" id="statNew">0</div><div class="stat-lbl">New</div></div>
+    <div class="stat-card">
+      <div class="stat-val" id="statLearned">0</div>
+      <div class="stat-lbl">Learned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statDue">0</div>
+      <div class="stat-lbl">Due today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statNew">0</div>
+      <div class="stat-lbl">New</div>
+    </div>
   </div>
+
   <div class="cta-wrap">
     <button class="study-cta" id="ctaMain" onclick="openModeScreen(null)">
-      <span id="ctaText">Start learning</span><span class="cta-arrow">→</span>
+      <span id="ctaText">Start learning</span>
+      <span class="cta-arrow">→</span>
     </button>
   </div>
+
   <div class="science-note">
     <span class="science-icon">🧠</span>
-    <div class="science-text"><strong>Spaced repetition</strong> — cards you struggle with come back sooner, ones you nail get spaced out. The same algorithm used by Anki &amp; medical students worldwide.</div>
+    <div class="science-text">
+      <strong>Spaced repetition</strong> — cards you struggle with come back sooner, ones you nail get spaced out.
+      The same algorithm used by Anki &amp; medical students worldwide.
+    </div>
   </div>
+
   <div class="sec-lbl">Study by topic</div>
   <div class="cat-grid" id="catGrid"></div>
 </div>
 
-<!-- MODE PICKER -->
+
+<!-- ════════════════════════════════════════════════════════
+     MODE PICKER
+════════════════════════════════════════════════════════ -->
 <div id="sMode" class="scr">
+
   <div class="mode-hdr">
     <button class="back-btn" onclick="goHome()">✕</button>
     <div class="mode-hdr-title">Choose a study mode</div>
   </div>
   <div class="mode-subtitle">Research shows typing &amp; gap-fill produce 2.5× better retention than multiple choice.</div>
+
   <div class="mode-grid">
+
+    <!-- Flashcard (classic) -->
     <div class="mode-card full ac-card" onclick="launchMode('flip')">
       <span class="mode-em">🃏</span>
-      <div style="flex:1"><div class="mode-name">Flashcard</div><div class="mode-desc">Flip to reveal the answer, then rate yourself</div></div>
+      <div style="flex:1">
+        <div class="mode-name">Flashcard</div>
+        <div class="mode-desc">Flip to reveal the answer, then rate yourself</div>
+      </div>
       <span class="mode-badge badge-ac ml-auto">Classic</span>
     </div>
+
+    <!-- 4-Choice -->
     <div class="mode-card" onclick="launchMode('choice')">
-      <span class="mode-em">🎯</span><span class="mode-badge badge-ok">Easier</span>
+      <span class="mode-em">🎯</span>
+      <span class="mode-badge badge-ok">Easier</span>
       <div class="mode-name">4-Choice</div>
       <div class="mode-desc">See English, pick the right Italian from 4 options</div>
     </div>
+
+    <!-- Fill the Gap -->
     <div class="mode-card" onclick="launchMode('gap')">
-      <span class="mode-em">📝</span><span class="mode-badge badge-err">Harder</span>
+      <span class="mode-em">📝</span>
+      <span class="mode-badge badge-err">Harder</span>
       <div class="mode-name">Fill the Gap</div>
       <div class="mode-desc">Complete the example sentence</div>
     </div>
+
+    <!-- Type It -->
     <div class="mode-card" onclick="launchMode('type')">
-      <span class="mode-em">⌨️</span><span class="mode-badge badge-err">Hardest</span>
+      <span class="mode-em">⌨️</span>
+      <span class="mode-badge badge-err">Hardest</span>
       <div class="mode-name">Type It</div>
       <div class="mode-desc">See English, type the full Italian from memory</div>
     </div>
+
+    <!-- Speed Round -->
     <div class="mode-card full warn-card" onclick="launchMode('speed')">
       <span class="mode-em">⚡</span>
-      <div style="flex:1"><div class="mode-name">Speed Round</div><div class="mode-desc">60-second blitz through all 100 words — how many can you get?</div></div>
+      <div style="flex:1">
+        <div class="mode-name">Speed Round</div>
+        <div class="mode-desc">60-second blitz through all 100 words — how many can you get?</div>
+      </div>
       <span class="mode-badge badge-warn ml-auto">Timed</span>
     </div>
+
   </div>
 </div>
 
-<!-- STUDY -->
+
+<!-- ════════════════════════════════════════════════════════
+     STUDY
+════════════════════════════════════════════════════════ -->
 <div id="sStudy" class="scr">
+
   <div class="study-hdr">
     <button class="back-btn" onclick="exitStudy()">✕</button>
-    <div class="prog-rail"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-rail">
+      <div class="prog-fill" id="progFill" style="width:0%"></div>
+    </div>
     <div class="prog-lbl" id="progLbl">0 / 0</div>
   </div>
+
+  <!-- Speed timer (speed mode only) -->
   <div class="timer-wrap" id="timerWrap">
     <div class="timer-top-row">
       <span class="timer-score-lbl" id="timerScore">0 correct</span>
       <span class="timer-count-lbl" id="timerCount">0:60</span>
     </div>
-    <div class="timer-rail"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    <div class="timer-rail">
+      <div class="timer-fill" id="timerFill" style="width:100%"></div>
+    </div>
   </div>
+
+  <!-- Flip card (classic flashcard mode) -->
   <div class="card-scene" id="cardScene" onclick="flipCard()">
     <div class="card-wrap" id="cardWrap">
+
+      <!-- Front -->
       <div class="card-face card-front">
         <div class="card-badge" id="cardBadge">—</div>
         <div class="card-new-badge" id="newBadge" style="display:none">NEW</div>
         <div class="card-word" id="cardWord">—</div>
         <div class="card-pron" id="cardPron">—</div>
-        <div class="tap-hint">Tap to reveal</div>
+        <div class="tap-hint" id="tapHint">Tap to reveal</div>
       </div>
+
+      <!-- Back -->
       <div class="card-face card-back">
         <div class="card-badge" id="cardBadge2">—</div>
         <div class="card-en" id="cardEn">—</div>
         <div class="card-pron-back" id="cardPronBack">—</div>
         <div class="card-divider"></div>
-        <div style="text-align:center"><div class="card-eg-label">Example</div><div class="card-eg" id="cardEg">—</div></div>
+        <div style="text-align:center">
+          <div class="card-eg-label">Example</div>
+          <div class="card-eg" id="cardEg">—</div>
+          <div class="card-eg-en" id="cardEgEn"></div>
+        </div>
+        <div class="card-note" id="cardNote" style="display:none">—</div>
       </div>
+
     </div>
   </div>
+
+  <!-- Input panel (Type It + Fill the Gap) -->
   <div class="input-panel" id="inputPanel">
     <div class="input-mode-lbl" id="inputModeLbl">Translate to Italian</div>
+    <div class="gap-hint" id="gapHint" style="display:none">—</div>
     <div class="input-prompt" id="inputPrompt">—</div>
     <div class="gap-sentence" id="gapSentence" style="display:none">—</div>
-    <input type="text" class="type-field" id="typeField" placeholder="type Italian here…"
+    <div class="gap-eg-en" id="gapEgEn"></div>
+    <input type="text" class="type-field" id="typeField"
+           placeholder="type Italian here…"
            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-           oninput="onTypeInput()" onkeydown="if(event.key==='Enter'&&!this.disabled)submitTyped()"/>
+           oninput="onTypeInput()"
+           onkeydown="if(event.key==='Enter' && !this.disabled)submitTyped()"/>
     <button class="submit-btn" id="submitBtn" onclick="submitTyped()">Check →</button>
     <div class="input-reveal" id="inputReveal">
       <div class="input-reveal-word" id="inputRevealWord">—</div>
       <div class="input-reveal-note" id="inputRevealNote">—</div>
+      <div class="input-reveal-eg" id="inputRevealEg"></div>
     </div>
   </div>
+
+  <!-- Choice panel (4-Choice + Speed) -->
   <div class="choice-panel" id="choicePanel">
     <div class="choice-mode-lbl" id="choiceModeLbl">What is this in Italian?</div>
     <div class="choice-prompt" id="choicePrompt">—</div>
     <div class="choice-grid" id="choiceGrid"></div>
   </div>
+
+  <!-- Answer buttons (flip mode + input mode after submit) -->
   <div class="answer-wrap" id="answerWrap">
     <div class="answer-hint">How well did you know it?</div>
     <div class="answer-row">
-      <button class="answer-btn btn-miss" onclick="answer(1)"><span class="ab-icon">✕</span><span class="ab-lbl">Missed</span></button>
-      <button class="answer-btn btn-almost" onclick="answer(3)"><span class="ab-icon">≈</span><span class="ab-lbl">Almost</span></button>
-      <button class="answer-btn btn-got" onclick="answer(5)"><span class="ab-icon">✓</span><span class="ab-lbl">Got it!</span></button>
+      <button class="answer-btn btn-miss" onclick="answer(1)">
+        <span class="ab-icon">✕</span>
+        <span class="ab-lbl">Missed</span>
+      </button>
+      <button class="answer-btn btn-almost" onclick="answer(3)">
+        <span class="ab-icon">≈</span>
+        <span class="ab-lbl">Almost</span>
+      </button>
+      <button class="answer-btn btn-got" onclick="answer(5)">
+        <span class="ab-icon">✓</span>
+        <span class="ab-lbl">Got it!</span>
+      </button>
     </div>
   </div>
+
 </div>
 
-<!-- DONE -->
+
+<!-- ════════════════════════════════════════════════════════
+     DONE
+════════════════════════════════════════════════════════ -->
 <div id="sDone" class="scr">
   <div class="done-inner">
     <div class="done-em" id="doneEm">🎉</div>
     <div class="done-title" id="doneTitle">Session done!</div>
     <div class="done-sub" id="doneSub">—</div>
+
     <div class="done-stats">
-      <div class="done-stat"><div class="done-stat-val" id="doneTotal" style="color:var(--ac)">0</div><div class="done-stat-lbl">Reviewed</div></div>
-      <div class="done-stat"><div class="done-stat-val" id="doneGot" style="color:var(--ok)">0</div><div class="done-stat-lbl">Knew it</div></div>
-      <div class="done-stat"><div class="done-stat-val" id="doneMissed" style="color:var(--err)">0</div><div class="done-stat-lbl">Missed</div></div>
+      <div class="done-stat">
+        <div class="done-stat-val" id="doneTotal" style="color:var(--ac)">0</div>
+        <div class="done-stat-lbl">Reviewed</div>
+      </div>
+      <div class="done-stat">
+        <div class="done-stat-val" id="doneGot" style="color:var(--ok)">0</div>
+        <div class="done-stat-lbl">Knew it</div>
+      </div>
+      <div class="done-stat">
+        <div class="done-stat-val" id="doneMissed" style="color:var(--err)">0</div>
+        <div class="done-stat-lbl">Missed</div>
+      </div>
     </div>
+
     <button class="done-btn" onclick="goHome()">Back home →</button>
   </div>
 </div>
 
+
 <script>
 'use strict';
-var CATS={basics:{name:'Basics',em:'🤝'},food:{name:'Food',em:'🍕'},directions:{name:'Directions',em:'🗺️'},transport:{name:'Transport',em:'🚆'},stay:{name:'Stay',em:'🏨'},shop:{name:'Shopping',em:'🛍️'},emergency:{name:'Emergency',em:'🚨'},numbers:{name:'Numbers',em:'🔢'},time:{name:'Time',em:'⏰'}};
-var WORDS=[
-  {id:0,cat:'basics',it:'Ciao',en:'Hello / Bye',pron:'cha-oh',eg:'Ciao! Come stai?'},
-  {id:1,cat:'basics',it:'Buongiorno',en:'Good morning',pron:'bwon-JOR-no',eg:'Buongiorno! Un caffè, per favore.'},
-  {id:2,cat:'basics',it:'Buonasera',en:'Good evening',pron:'bwon-ah-SAY-rah',eg:'Buonasera! Ha un tavolo libero?'},
-  {id:3,cat:'basics',it:'Per favore',en:'Please',pron:'pair fah-VOH-ray',eg:"Un'acqua, per favore."},
-  {id:4,cat:'basics',it:'Grazie',en:'Thank you',pron:'GRAT-syeh',eg:'Grazie mille!'},
-  {id:5,cat:'basics',it:'Prego',en:"You're welcome",pron:'PRAY-go',eg:'"Grazie!" "Prego!"'},
-  {id:6,cat:'basics',it:'Scusa',en:'Excuse me / Sorry',pron:'SKOO-zah',eg:"Scusa, dov'è il bagno?"},
-  {id:7,cat:'basics',it:'Mi dispiace',en:"I'm sorry",pron:'mee dis-PYAH-chay',eg:'Mi dispiace, non capisco.'},
-  {id:8,cat:'basics',it:'Sì',en:'Yes',pron:'see',eg:'Sì, grazie!'},
-  {id:9,cat:'basics',it:'No',en:'No',pron:'no',eg:'No, grazie.'},
-  {id:10,cat:'basics',it:'Non capisco',en:"I don't understand",pron:'non kah-PEES-ko',eg:'Scusa, non capisco. Parla più lento?'},
-  {id:11,cat:'basics',it:'Parla inglese?',en:'Do you speak English?',pron:'PAR-lah in-GLAY-zay',eg:'Parla inglese? Non parlo italiano bene.'},
-  {id:12,cat:'basics',it:'Quanto costa?',en:'How much is it?',pron:'KWAN-toh KOS-tah',eg:'Quanto costa questo?'},
-  {id:13,cat:'basics',it:"Dov'è...?",en:'Where is...?',pron:'doh-VEH',eg:"Dov'è la stazione?"},
-  {id:14,cat:'basics',it:'Basta',en:"That's enough / Stop",pron:'BAS-tah',eg:'Basta, grazie!'},
-  {id:15,cat:'food',it:'Acqua',en:'Water',pron:'AH-kwah',eg:"Un'acqua naturale, per favore."},
-  {id:16,cat:'food',it:'Vino',en:'Wine',pron:'VEE-no',eg:'Un bicchiere di vino rosso.'},
-  {id:17,cat:'food',it:'Birra',en:'Beer',pron:'BEER-rah',eg:'Una birra alla spina, per favore.'},
-  {id:18,cat:'food',it:'Caffè',en:'Coffee',pron:'kah-FEH',eg:'Un caffè, per favore.'},
-  {id:19,cat:'food',it:'Pane',en:'Bread',pron:'PAH-nay',eg:'Posso avere del pane?'},
-  {id:20,cat:'food',it:'Il conto',en:'The bill',pron:'eel KON-toh',eg:'Il conto, per favore!'},
-  {id:21,cat:'food',it:'Un tavolo',en:'A table',pron:'oon TAH-vo-lo',eg:'Un tavolo per due, per favore.'},
-  {id:22,cat:'food',it:'Menù',en:'Menu',pron:'meh-NOO',eg:'Posso vedere il menù?'},
-  {id:23,cat:'food',it:'Vegetariano',en:'Vegetarian',pron:'veh-jeh-tah-RYAH-no',eg:'Avete piatti vegetariani?'},
-  {id:24,cat:'food',it:'Senza glutine',en:'Gluten free',pron:'SEN-tsah GLOO-tee-nay',eg:'È senza glutine?'},
-  {id:25,cat:'food',it:'Allergia',en:'Allergy',pron:'ah-lair-JEE-ah',eg:"Ho un'allergia alle noci."},
-  {id:26,cat:'food',it:'Delizioso',en:'Delicious',pron:'deh-leet-SYOH-zo',eg:'Questo è delizioso!'},
-  {id:27,cat:'food',it:'Cameriere',en:'Waiter',pron:'kah-mair-YEH-ray',eg:'Cameriere! Il conto, per favore.'},
-  {id:28,cat:'food',it:'Antipasto',en:'Starter',pron:'an-tee-PAS-toh',eg:'Come antipasto, vorrei il prosciutto.'},
-  {id:29,cat:'food',it:'Dolce',en:'Dessert / Sweet',pron:'DOL-chay',eg:'Per dolce, un tiramisù per favore.'},
-  {id:30,cat:'food',it:'Prenotazione',en:'Reservation',pron:'preh-no-tat-SYOH-nay',eg:'Ho una prenotazione per le 20:00.'},
-  {id:31,cat:'directions',it:'A sinistra',en:'To the left',pron:'ah see-NEES-trah',eg:'Gira a sinistra alla piazza.'},
-  {id:32,cat:'directions',it:'A destra',en:'To the right',pron:'ah DES-trah',eg:'La stazione è a destra.'},
-  {id:33,cat:'directions',it:'Dritto',en:'Straight ahead',pron:'DREET-toh',eg:'Vai dritto per 200 metri.'},
-  {id:34,cat:'directions',it:'Gira',en:'Turn',pron:'JEE-rah',eg:'Gira a destra al semaforo.'},
-  {id:35,cat:'directions',it:'Qui',en:'Here',pron:'KWEE',eg:'Fermati qui, per favore.'},
-  {id:36,cat:'directions',it:'Lì',en:'There',pron:'lee',eg:'Il ristorante è lì.'},
-  {id:37,cat:'directions',it:'Lontano',en:'Far away',pron:'lon-TAH-no',eg:'È lontano? Posso andare a piedi?'},
-  {id:38,cat:'directions',it:'Vicino',en:'Near / Close',pron:'vee-CHEE-no',eg:'È vicino alla stazione.'},
-  {id:39,cat:'directions',it:'Strada',en:'Street / Road',pron:'STRAH-dah',eg:'Qual è questa strada?'},
-  {id:40,cat:'directions',it:'Piazza',en:'Square / Plaza',pron:'PYAT-tsah',eg:'Ci troviamo in piazza?'},
-  {id:41,cat:'directions',it:'Centro',en:'City centre',pron:'CHEN-tro',eg:'Come arrivo al centro?'},
-  {id:42,cat:'directions',it:'Mi sono perso',en:"I'm lost",pron:'mee SOH-no PAIR-so',eg:'Mi sono perso. Può aiutarmi?'},
-  {id:43,cat:'transport',it:'Treno',en:'Train',pron:'TRAY-no',eg:'A che ora parte il treno?'},
-  {id:44,cat:'transport',it:'Autobus',en:'Bus',pron:'OW-toh-boos',eg:"Dov'è la fermata dell'autobus?"},
-  {id:45,cat:'transport',it:'Taxi',en:'Taxi',pron:'TAH-ksee',eg:'Può chiamarmi un taxi?'},
-  {id:46,cat:'transport',it:'Aeroporto',en:'Airport',pron:'ah-ay-ro-POR-toh',eg:"Come arrivo all'aeroporto?"},
-  {id:47,cat:'transport',it:'Biglietto',en:'Ticket',pron:'beel-YET-toh',eg:'Un biglietto per Roma, per favore.'},
-  {id:48,cat:'transport',it:'Binario',en:'Platform',pron:'bee-NAH-ryoh',eg:'Da quale binario parte il treno?'},
-  {id:49,cat:'transport',it:'Quando parte?',en:'When does it leave?',pron:'KWAN-doh PAR-tay',eg:'Quando parte il prossimo treno?'},
-  {id:50,cat:'transport',it:'Fermata',en:'Stop',pron:'fair-MAH-tah',eg:'È la prossima fermata?'},
-  {id:51,cat:'transport',it:'Metro',en:'Metro / Subway',pron:'MET-roh',eg:"Dov'è la stazione della metro?"},
-  {id:52,cat:'transport',it:'Andata e ritorno',en:'Return ticket',pron:'an-DAH-tah ay ree-TOR-no',eg:'Un biglietto andata e ritorno.'},
-  {id:53,cat:'transport',it:'In ritardo',en:'Delayed / Late',pron:'in ree-TAR-doh',eg:'Il treno è in ritardo di 20 minuti.'},
-  {id:54,cat:'transport',it:'Stazione',en:'Station',pron:'stat-SYOH-nay',eg:"Dov'è la stazione centrale?"},
-  {id:55,cat:'stay',it:'Camera',en:'Room',pron:'KAH-meh-rah',eg:'Ho prenotato una camera doppia.'},
-  {id:56,cat:'stay',it:'Bagno',en:'Bathroom',pron:'BAH-nyo',eg:"Dov'è il bagno?"},
-  {id:57,cat:'stay',it:'Chiave',en:'Key',pron:'KYAH-vay',eg:'Posso avere la chiave della camera?'},
-  {id:58,cat:'stay',it:'Colazione',en:'Breakfast',pron:'ko-lat-SYOH-nay',eg:'La colazione è inclusa?'},
-  {id:59,cat:'stay',it:'Ascensore',en:'Lift / Elevator',pron:'ah-shen-SOH-ray',eg:"Dov'è l'ascensore?"},
-  {id:60,cat:'stay',it:'Piano',en:'Floor',pron:'PYAH-no',eg:'Sono al secondo piano.'},
-  {id:61,cat:'stay',it:'Wi-Fi',en:'Wi-Fi password',pron:'wee-FEE',eg:'Qual è la password del Wi-Fi?'},
-  {id:62,cat:'stay',it:'Check-out',en:'Check out',pron:'chek-owt',eg:'A che ora è il check-out?'},
-  {id:63,cat:'shop',it:'Caro',en:'Expensive',pron:'KAH-ro',eg:'È troppo caro per me.'},
-  {id:64,cat:'shop',it:'Economico',en:'Cheap / Affordable',pron:'eh-ko-NOH-mee-ko',eg:'Avete qualcosa di più economico?'},
-  {id:65,cat:'shop',it:'Vorrei...',en:'I would like...',pron:'vor-RAY',eg:'Vorrei questo, per favore.'},
-  {id:66,cat:'shop',it:'Contanti',en:'Cash',pron:'kon-TAN-tee',eg:'Pago in contanti.'},
-  {id:67,cat:'shop',it:'Carta',en:'Card (payment)',pron:'KAR-tah',eg:'Accettate la carta?'},
-  {id:68,cat:'shop',it:'Mercato',en:'Market',pron:'mair-KAH-toh',eg:'A che ora apre il mercato?'},
-  {id:69,cat:'shop',it:'Aperto',en:'Open',pron:'ah-PAIR-toh',eg:'Il negozio è aperto?'},
-  {id:70,cat:'shop',it:'Chiuso',en:'Closed',pron:'KYOO-zo',eg:'Mi dispiace, siamo chiusi.'},
-  {id:71,cat:'shop',it:'Sconto',en:'Discount',pron:'SKON-toh',eg:"C'è uno sconto?"},
-  {id:72,cat:'emergency',it:'Aiuto!',en:'Help!',pron:'ah-YOO-toh',eg:'Aiuto! Ho bisogno di aiuto!'},
-  {id:73,cat:'emergency',it:'Dottore',en:'Doctor',pron:'dot-TOH-ray',eg:'Ho bisogno di un dottore.'},
-  {id:74,cat:'emergency',it:'Polizia',en:'Police',pron:'po-LEET-syah',eg:'Chiamate la polizia!'},
-  {id:75,cat:'emergency',it:'Farmacia',en:'Pharmacy',pron:'far-mah-CHEE-ah',eg:"Dov'è la farmacia più vicina?"},
-  {id:76,cat:'emergency',it:'Ospedale',en:'Hospital',pron:'os-peh-DAH-lay',eg:"Mi porti all'ospedale, per favore."},
-  {id:77,cat:'emergency',it:'Ambulanza',en:'Ambulance',pron:'am-boo-LAN-tsah',eg:"Chiamate un'ambulanza!"},
-  {id:78,cat:'emergency',it:'Sto male',en:"I don't feel well",pron:'stoh MAH-lay',eg:'Sto male. Ho bisogno di aiuto.'},
-  {id:79,cat:'numbers',it:'Uno',en:'One (1)',pron:'OO-no',eg:'Un caffè, per favore.'},
-  {id:80,cat:'numbers',it:'Due',en:'Two (2)',pron:'DOO-ay',eg:'Un tavolo per due.'},
-  {id:81,cat:'numbers',it:'Tre',en:'Three (3)',pron:'tray',eg:'Tre biglietti, per favore.'},
-  {id:82,cat:'numbers',it:'Quattro',en:'Four (4)',pron:'KWAT-tro',eg:'Quattro persone.'},
-  {id:83,cat:'numbers',it:'Cinque',en:'Five (5)',pron:'CHEEN-kway',eg:'Cinque euro.'},
-  {id:84,cat:'numbers',it:'Sei',en:'Six (6)',pron:'say',eg:'Sei ore.'},
-  {id:85,cat:'numbers',it:'Sette',en:'Seven (7)',pron:'SET-tay',eg:'Sette giorni.'},
-  {id:86,cat:'numbers',it:'Otto',en:'Eight (8)',pron:'OT-toh',eg:'Otto persone.'},
-  {id:87,cat:'numbers',it:'Nove',en:'Nine (9)',pron:'NOH-vay',eg:'Nove euro.'},
-  {id:88,cat:'numbers',it:'Dieci',en:'Ten (10)',pron:'DYEH-chee',eg:'Dieci minuti.'},
-  {id:89,cat:'numbers',it:'Venti',en:'Twenty (20)',pron:'VEN-tee',eg:'Venti euro.'},
-  {id:90,cat:'numbers',it:'Cento',en:'One hundred (100)',pron:'CHEN-toh',eg:'Cento euro.'},
-  {id:91,cat:'time',it:'Oggi',en:'Today',pron:'OJ-jee',eg:'Oggi fa caldo.'},
-  {id:92,cat:'time',it:'Domani',en:'Tomorrow',pron:'doh-MAH-nee',eg:'Ci vediamo domani.'},
-  {id:93,cat:'time',it:'Ieri',en:'Yesterday',pron:'YEH-ree',eg:'Ieri siamo stati a Roma.'},
-  {id:94,cat:'time',it:'Mattina',en:'Morning',pron:'mat-TEE-nah',eg:'Di mattina bevo il caffè.'},
-  {id:95,cat:'time',it:'Pomeriggio',en:'Afternoon',pron:'poh-meh-REE-joh',eg:'Nel pomeriggio andiamo al museo.'},
-  {id:96,cat:'time',it:'Sera',en:'Evening',pron:'SAY-rah',eg:'Buona sera!'},
-  {id:97,cat:'time',it:'Adesso',en:'Now',pron:'ah-DES-so',eg:'Partiamo adesso.'},
-  {id:98,cat:'time',it:'Dopo',en:'Later',pron:'DOH-po',eg:'Ci vediamo dopo.'},
-  {id:99,cat:'time',it:'Che ore sono?',en:'What time is it?',pron:'kay OH-ray SOH-no',eg:'Scusa, che ore sono?'},
+
+/* ═══════════════════════════════════════════════════════════
+   VOCABULARY DATA — 100 travel-essential Italian words
+═══════════════════════════════════════════════════════════ */
+
+var CATS = {
+  basics:    {name:'Basics',     em:'🤝'},
+  food:      {name:'Food',       em:'🍕'},
+  directions:{name:'Directions', em:'🗺️'},
+  transport: {name:'Transport',  em:'🚆'},
+  stay:      {name:'Stay',       em:'🏨'},
+  shop:      {name:'Shopping',   em:'🛍️'},
+  emergency: {name:'Emergency',  em:'🚨'},
+  numbers:   {name:'Numbers',    em:'🔢'},
+  time:      {name:'Time',       em:'⏰'},
+};
+
+var WORDS = [
+  // BASICS (15)
+  {id:0,  cat:'basics', it:'Ciao',            en:'Hello / Bye',           pron:'cha-oh',              eg:'Ciao! Come stai?',                      egEn:'Hi! How are you?',                        note:'Informal — use with friends, not with strangers or in shops.'},
+  {id:1,  cat:'basics', it:'Buongiorno',      en:'Good morning',          pron:'bwon-JOR-no',         eg:'Buongiorno! Un caffè, per favore.',      egEn:'Good morning! A coffee, please.'},
+  {id:2,  cat:'basics', it:'Buonasera',       en:'Good evening',          pron:'bwon-ah-SAY-rah',     eg:'Buonasera! Ha un tavolo libero?',        egEn:'Good evening! Do you have a free table?'},
+  {id:3,  cat:'basics', it:'Per favore',      en:'Please',                pron:'pair fah-VOH-ray',    eg:"Un'acqua, per favore.",                  egEn:'A water, please.'},
+  {id:4,  cat:'basics', it:'Grazie',          en:'Thank you',             pron:'GRAT-syeh',           eg:'Grazie mille!',                          egEn:'Thank you so much! (lit. a thousand thanks)'},
+  {id:5,  cat:'basics', it:'Prego',           en:"You're welcome",        pron:'PRAY-go',             eg:'"Grazie!" "Prego!"',                     egEn:'"Thank you!" "You\'re welcome!"',          note:'Also means "please go ahead" or "after you" — very versatile.'},
+  {id:6,  cat:'basics', it:'Scusa',           en:'Excuse me / Sorry',     pron:'SKOO-zah',            eg:"Scusa, dov'è il bagno?",                 egEn:"Excuse me, where's the bathroom?"},
+  {id:7,  cat:'basics', it:'Mi dispiace',     en:"I'm sorry",             pron:'mee dis-PYAH-chay',   eg:'Mi dispiace, non capisco.',              egEn:"I'm sorry, I don't understand."},
+  {id:8,  cat:'basics', it:'Sì',              en:'Yes',                   pron:'see',                 eg:'Sì, grazie!',                            egEn:'Yes, thank you!',                         note:'The accent is important — without it "si" is a reflexive pronoun.'},
+  {id:9,  cat:'basics', it:'No',              en:'No',                    pron:'no',                  eg:'No, grazie.',                            egEn:'No, thank you.'},
+  {id:10, cat:'basics', it:'Non capisco',     en:"I don't understand",    pron:'non kah-PEES-ko',     eg:'Scusa, non capisco. Parla più lento?',   egEn:"Excuse me, I don't understand. Can you speak more slowly?"},
+  {id:11, cat:'basics', it:'Parla inglese?',  en:'Do you speak English?', pron:'PAR-lah in-GLAY-zay', eg:'Parla inglese? Non parlo italiano bene.', egEn:"Do you speak English? I don't speak Italian well."},
+  {id:12, cat:'basics', it:'Quanto costa?',   en:'How much is it?',       pron:'KWAN-toh KOS-tah',    eg:'Quanto costa questo?',                   egEn:'How much does this cost?'},
+  {id:13, cat:'basics', it:"Dov'è...?",       en:'Where is...?',          pron:'doh-VEH',             eg:"Dov'è la stazione?",                     egEn:'Where is the station?'},
+  {id:14, cat:'basics', it:'Basta',           en:"That's enough / Stop",  pron:'BAS-tah',             eg:'Basta, grazie!',                         egEn:"That's enough, thank you!",               note:'Add "grazie" to soften it — alone it can sound quite blunt.'},
+
+  // FOOD & DRINK (16)
+  {id:15, cat:'food', it:'Acqua',             en:'Water',                 pron:'AH-kwah',             eg:"Un'acqua naturale, per favore.",          egEn:'A still water, please.'},
+  {id:16, cat:'food', it:'Vino',              en:'Wine',                  pron:'VEE-no',              eg:'Un bicchiere di vino rosso.',             egEn:'A glass of red wine.'},
+  {id:17, cat:'food', it:'Birra',             en:'Beer',                  pron:'BEER-rah',            eg:'Una birra alla spina, per favore.',       egEn:'A draft beer, please.'},
+  {id:18, cat:'food', it:'Caffè',             en:'Coffee',                pron:'kah-FEH',             eg:'Un caffè, per favore.',                   egEn:'A coffee, please.',                       note:'In Italy "un caffè" means an espresso — ask for "caffè americano" for a long coffee.'},
+  {id:19, cat:'food', it:'Pane',              en:'Bread',                 pron:'PAH-nay',             eg:'Posso avere del pane?',                   egEn:'Can I have some bread?'},
+  {id:20, cat:'food', it:'Il conto',          en:'The bill',              pron:'eel KON-toh',         eg:'Il conto, per favore!',                   egEn:'The bill, please!'},
+  {id:21, cat:'food', it:'Un tavolo',         en:'A table',               pron:'oon TAH-vo-lo',       eg:'Un tavolo per due, per favore.',          egEn:'A table for two, please.'},
+  {id:22, cat:'food', it:'Menù',              en:'Menu',                  pron:'meh-NOO',             eg:'Posso vedere il menù?',                   egEn:'Can I see the menu?'},
+  {id:23, cat:'food', it:'Vegetariano',       en:'Vegetarian',            pron:'veh-jeh-tah-RYAH-no', eg:'Avete piatti vegetariani?',               egEn:'Do you have vegetarian dishes?'},
+  {id:24, cat:'food', it:'Senza glutine',     en:'Gluten free',           pron:'SEN-tsah GLOO-tee-nay',eg:'È senza glutine?',                      egEn:'Is it gluten free?'},
+  {id:25, cat:'food', it:'Allergia',          en:'Allergy',               pron:'ah-lair-JEE-ah',      eg:"Ho un'allergia alle noci.",               egEn:'I have a nut allergy.'},
+  {id:26, cat:'food', it:'Delizioso',         en:'Delicious',             pron:'deh-leet-SYOH-zo',    eg:'Questo è delizioso!',                     egEn:'This is delicious!'},
+  {id:27, cat:'food', it:'Cameriere',         en:'Waiter',                pron:'kah-mair-YEH-ray',    eg:'Cameriere! Il conto, per favore.',        egEn:'Waiter! The bill, please.',               note:'Male form. For a waitress say "Cameriera!" (kah-mair-YEH-rah).'},
+  {id:28, cat:'food', it:'Antipasto',         en:'Starter',               pron:'an-tee-PAS-toh',      eg:'Come antipasto, vorrei il prosciutto.',   egEn:'As a starter, I would like the ham.'},
+  {id:29, cat:'food', it:'Dolce',             en:'Dessert / Sweet',       pron:'DOL-chay',            eg:'Per dolce, un tiramisù per favore.',      egEn:'For dessert, a tiramisu please.',          note:'Also "la dolce vita" — the sweet life! Used as an adjective too.'},
+  {id:30, cat:'food', it:'Prenotazione',      en:'Reservation',           pron:'preh-no-tat-SYOH-nay',eg:'Ho una prenotazione per le 20:00.',       egEn:'I have a reservation for 8pm.'},
+
+  // DIRECTIONS (12)
+  {id:31, cat:'directions', it:'A sinistra',  en:'To the left',           pron:'ah see-NEES-trah',    eg:'Gira a sinistra alla piazza.',            egEn:'Turn left at the square.'},
+  {id:32, cat:'directions', it:'A destra',    en:'To the right',          pron:'ah DES-trah',         eg:'La stazione è a destra.',                 egEn:'The station is on the right.'},
+  {id:33, cat:'directions', it:'Dritto',      en:'Straight ahead',        pron:'DREET-toh',           eg:'Vai dritto per 200 metri.',               egEn:'Go straight for 200 metres.'},
+  {id:34, cat:'directions', it:'Gira',        en:'Turn',                  pron:'JEE-rah',             eg:'Gira a destra al semaforo.',              egEn:'Turn right at the traffic light.'},
+  {id:35, cat:'directions', it:'Qui',         en:'Here',                  pron:'KWEE',                eg:'Fermati qui, per favore.',                egEn:'Stop here, please.'},
+  {id:36, cat:'directions', it:'Lì',          en:'There',                 pron:'lee',                 eg:'Il ristorante è lì.',                     egEn:'The restaurant is there.'},
+  {id:37, cat:'directions', it:'Lontano',     en:'Far away',              pron:'lon-TAH-no',          eg:'È lontano? Posso andare a piedi?',        egEn:'Is it far? Can I walk there?'},
+  {id:38, cat:'directions', it:'Vicino',      en:'Near / Close',          pron:'vee-CHEE-no',         eg:'È vicino alla stazione.',                 egEn:"It's close to the station."},
+  {id:39, cat:'directions', it:'Strada',      en:'Street / Road',         pron:'STRAH-dah',           eg:'Qual è questa strada?',                   egEn:'What street is this?'},
+  {id:40, cat:'directions', it:'Piazza',      en:'Square / Plaza',        pron:'PYAT-tsah',           eg:'Ci troviamo in piazza?',                  egEn:'Shall we meet at the square?'},
+  {id:41, cat:'directions', it:'Centro',      en:'City centre',           pron:'CHEN-tro',            eg:'Come arrivo al centro?',                  egEn:'How do I get to the city centre?'},
+  {id:42, cat:'directions', it:'Mi sono perso',en:"I'm lost",             pron:'mee SOH-no PAIR-so',  eg:'Mi sono perso. Può aiutarmi?',            egEn:"I'm lost. Can you help me?",              note:'For a woman: "Mi sono persa" (PAIR-sah).'},
+
+  // TRANSPORT (12)
+  {id:43, cat:'transport', it:'Treno',        en:'Train',                 pron:'TRAY-no',             eg:'A che ora parte il treno?',               egEn:'What time does the train leave?'},
+  {id:44, cat:'transport', it:'Autobus',      en:'Bus',                   pron:'OW-toh-boos',         eg:"Dov'è la fermata dell'autobus?",          egEn:'Where is the bus stop?'},
+  {id:45, cat:'transport', it:'Taxi',         en:'Taxi',                  pron:'TAH-ksee',            eg:'Può chiamarmi un taxi?',                  egEn:'Can you call me a taxi?'},
+  {id:46, cat:'transport', it:'Aeroporto',    en:'Airport',               pron:'ah-ay-ro-POR-toh',    eg:"Come arrivo all'aeroporto?",              egEn:'How do I get to the airport?'},
+  {id:47, cat:'transport', it:'Biglietto',    en:'Ticket',                pron:'beel-YET-toh',        eg:'Un biglietto per Roma, per favore.',       egEn:'A ticket to Rome, please.'},
+  {id:48, cat:'transport', it:'Binario',      en:'Platform',              pron:'bee-NAH-ryoh',        eg:'Da quale binario parte il treno?',         egEn:'Which platform does the train leave from?'},
+  {id:49, cat:'transport', it:'Quando parte?',en:'When does it leave?',   pron:'KWAN-doh PAR-tay',   eg:'Quando parte il prossimo treno?',          egEn:'When does the next train leave?'},
+  {id:50, cat:'transport', it:'Fermata',      en:'Stop',                  pron:'fair-MAH-tah',        eg:'È la prossima fermata?',                   egEn:'Is this the next stop?'},
+  {id:51, cat:'transport', it:'Metro',        en:'Metro / Subway',        pron:'MET-roh',             eg:"Dov'è la stazione della metro?",           egEn:'Where is the metro station?'},
+  {id:52, cat:'transport', it:'Andata e ritorno',en:'Return ticket',      pron:'an-DAH-tah ay ree-TOR-no',eg:'Un biglietto andata e ritorno.',       egEn:'A return ticket.'},
+  {id:53, cat:'transport', it:'In ritardo',   en:'Delayed / Late',        pron:'in ree-TAR-doh',      eg:'Il treno è in ritardo di 20 minuti.',      egEn:'The train is 20 minutes late.'},
+  {id:54, cat:'transport', it:'Stazione',     en:'Station',               pron:'stat-SYOH-nay',       eg:"Dov'è la stazione centrale?",              egEn:'Where is the central station?'},
+
+  // STAY (8)
+  {id:55, cat:'stay', it:'Camera',            en:'Room',                  pron:'KAH-meh-rah',         eg:'Ho prenotato una camera doppia.',          egEn:'I booked a double room.',                 note:'False friend — "camera" in Italian means room, not camera!'},
+  {id:56, cat:'stay', it:'Bagno',             en:'Bathroom',              pron:'BAH-nyo',             eg:"Dov'è il bagno?",                         egEn:'Where is the bathroom?'},
+  {id:57, cat:'stay', it:'Chiave',            en:'Key',                   pron:'KYAH-vay',            eg:'Posso avere la chiave della camera?',      egEn:'Can I have the room key?'},
+  {id:58, cat:'stay', it:'Colazione',         en:'Breakfast',             pron:'ko-lat-SYOH-nay',     eg:'La colazione è inclusa?',                  egEn:'Is breakfast included?'},
+  {id:59, cat:'stay', it:'Ascensore',         en:'Lift / Elevator',       pron:'ah-shen-SOH-ray',     eg:"Dov'è l'ascensore?",                      egEn:'Where is the lift?'},
+  {id:60, cat:'stay', it:'Piano',             en:'Floor',                 pron:'PYAH-no',             eg:'Sono al secondo piano.',                   egEn:"I'm on the second floor.",                note:'Also means "piano" (the instrument) and "slowly" — context tells you which!'},
+  {id:61, cat:'stay', it:'Wi-Fi',             en:'Wi-Fi password',        pron:'wee-FEE',             eg:'Qual è la password del Wi-Fi?',            egEn:"What's the Wi-Fi password?"},
+  {id:62, cat:'stay', it:'Check-out',         en:'Check out',             pron:'chek-owt',            eg:'A che ora è il check-out?',                egEn:'What time is check-out?'},
+
+  // SHOPPING (9)
+  {id:63, cat:'shop', it:'Caro',              en:'Expensive',             pron:'KAH-ro',              eg:'È troppo caro per me.',                    egEn:"It's too expensive for me."},
+  {id:64, cat:'shop', it:'Economico',         en:'Cheap / Affordable',    pron:'eh-ko-NOH-mee-ko',    eg:'Avete qualcosa di più economico?',         egEn:'Do you have something cheaper?'},
+  {id:65, cat:'shop', it:'Vorrei...',         en:'I would like...',       pron:'vor-RAY',             eg:'Vorrei questo, per favore.',               egEn:'I would like this, please.'},
+  {id:66, cat:'shop', it:'Contanti',          en:'Cash',                  pron:'kon-TAN-tee',         eg:'Pago in contanti.',                        egEn:"I'll pay in cash."},
+  {id:67, cat:'shop', it:'Carta',             en:'Card (payment)',        pron:'KAR-tah',             eg:'Accettate la carta?',                      egEn:'Do you accept card?',                     note:'Also means "paper", "map", or "menu" depending on context.'},
+  {id:68, cat:'shop', it:'Mercato',           en:'Market',                pron:'mair-KAH-toh',        eg:'A che ora apre il mercato?',               egEn:'What time does the market open?'},
+  {id:69, cat:'shop', it:'Aperto',            en:'Open',                  pron:'ah-PAIR-toh',         eg:'Il negozio è aperto?',                     egEn:'Is the shop open?'},
+  {id:70, cat:'shop', it:'Chiuso',            en:'Closed',                pron:'KYOO-zo',             eg:'Mi dispiace, siamo chiusi.',               egEn:"I'm sorry, we're closed."},
+  {id:71, cat:'shop', it:'Sconto',            en:'Discount',              pron:'SKON-toh',            eg:"C'è uno sconto?",                          egEn:'Is there a discount?'},
+
+  // EMERGENCY (7)
+  {id:72, cat:'emergency', it:'Aiuto!',       en:'Help!',                 pron:'ah-YOO-toh',          eg:'Aiuto! Ho bisogno di aiuto!',              egEn:'Help! I need help!'},
+  {id:73, cat:'emergency', it:'Dottore',      en:'Doctor',                pron:'dot-TOH-ray',         eg:'Ho bisogno di un dottore.',                egEn:'I need a doctor.'},
+  {id:74, cat:'emergency', it:'Polizia',      en:'Police',                pron:'po-LEET-syah',        eg:'Chiamate la polizia!',                     egEn:'Call the police!'},
+  {id:75, cat:'emergency', it:'Farmacia',     en:'Pharmacy',              pron:'far-mah-CHEE-ah',     eg:"Dov'è la farmacia più vicina?",            egEn:'Where is the nearest pharmacy?'},
+  {id:76, cat:'emergency', it:'Ospedale',     en:'Hospital',              pron:'os-peh-DAH-lay',      eg:"Mi porti all'ospedale, per favore.",       egEn:'Take me to the hospital, please.'},
+  {id:77, cat:'emergency', it:'Ambulanza',    en:'Ambulance',             pron:'am-boo-LAN-tsah',     eg:"Chiamate un'ambulanza!",                   egEn:'Call an ambulance!'},
+  {id:78, cat:'emergency', it:'Sto male',     en:"I don't feel well",     pron:'stoh MAH-lay',        eg:'Sto male. Ho bisogno di aiuto.',           egEn:"I don't feel well. I need help."},
+
+  // NUMBERS (12)
+  {id:79, cat:'numbers', it:'Uno',            en:'One (1)',               pron:'OO-no',               eg:'Un caffè, per favore.',                    egEn:'One coffee, please.'},
+  {id:80, cat:'numbers', it:'Due',            en:'Two (2)',               pron:'DOO-ay',              eg:'Un tavolo per due.',                       egEn:'A table for two.'},
+  {id:81, cat:'numbers', it:'Tre',            en:'Three (3)',             pron:'tray',                eg:'Tre biglietti, per favore.',               egEn:'Three tickets, please.'},
+  {id:82, cat:'numbers', it:'Quattro',        en:'Four (4)',              pron:'KWAT-tro',            eg:'Quattro persone.',                         egEn:'Four people.'},
+  {id:83, cat:'numbers', it:'Cinque',         en:'Five (5)',              pron:'CHEEN-kway',          eg:'Cinque euro.',                             egEn:'Five euros.'},
+  {id:84, cat:'numbers', it:'Sei',            en:'Six (6)',               pron:'say',                 eg:'Sei ore.',                                 egEn:'Six hours.'},
+  {id:85, cat:'numbers', it:'Sette',          en:'Seven (7)',             pron:'SET-tay',             eg:'Sette giorni.',                            egEn:'Seven days.'},
+  {id:86, cat:'numbers', it:'Otto',           en:'Eight (8)',             pron:'OT-toh',              eg:'Otto persone.',                            egEn:'Eight people.'},
+  {id:87, cat:'numbers', it:'Nove',           en:'Nine (9)',              pron:'NOH-vay',             eg:'Nove euro.',                               egEn:'Nine euros.'},
+  {id:88, cat:'numbers', it:'Dieci',          en:'Ten (10)',              pron:'DYEH-chee',           eg:'Dieci minuti.',                            egEn:'Ten minutes.'},
+  {id:89, cat:'numbers', it:'Venti',          en:'Twenty (20)',           pron:'VEN-tee',             eg:'Venti euro.',                              egEn:'Twenty euros.'},
+  {id:90, cat:'numbers', it:'Cento',          en:'One hundred (100)',     pron:'CHEN-toh',            eg:'Cento euro.',                              egEn:'One hundred euros.'},
+
+  // TIME (9)
+  {id:91, cat:'time', it:'Oggi',              en:'Today',                 pron:'OJ-jee',              eg:'Oggi fa caldo.',                           egEn:"It's hot today."},
+  {id:92, cat:'time', it:'Domani',            en:'Tomorrow',              pron:'doh-MAH-nee',         eg:'Ci vediamo domani.',                       egEn:'See you tomorrow.'},
+  {id:93, cat:'time', it:'Ieri',              en:'Yesterday',             pron:'YEH-ree',             eg:'Ieri siamo stati a Roma.',                 egEn:'Yesterday we were in Rome.'},
+  {id:94, cat:'time', it:'Mattina',           en:'Morning',               pron:'mat-TEE-nah',         eg:'Di mattina bevo il caffè.',                egEn:'In the morning I drink coffee.'},
+  {id:95, cat:'time', it:'Pomeriggio',        en:'Afternoon',             pron:'poh-meh-REE-joh',     eg:'Nel pomeriggio andiamo al museo.',         egEn:'In the afternoon we go to the museum.'},
+  {id:96, cat:'time', it:'Sera',              en:'Evening',               pron:'SAY-rah',             eg:'Buona sera!',                              egEn:'Good evening!'},
+  {id:97, cat:'time', it:'Adesso',            en:'Now',                   pron:'ah-DES-so',           eg:'Partiamo adesso.',                         egEn:"Let's leave now."},
+  {id:98, cat:'time', it:'Dopo',              en:'Later',                 pron:'DOH-po',              eg:'Ci vediamo dopo.',                         egEn:'See you later.'},
+  {id:99, cat:'time', it:'Che ore sono?',     en:'What time is it?',      pron:'kay OH-ray SOH-no',   eg:'Scusa, che ore sono?',                     egEn:'Excuse me, what time is it?'},
 ];
 
-var SK='lk_it',STK='lk_itst',NEW_LIMIT=10;
-function loadState(){try{return JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){return{}}}
-function saveState(s){localStorage.setItem(SK,JSON.stringify(s))}
-function loadStreak(){try{return JSON.parse(localStorage.getItem(STK)||'{"days":0,"last":""}')}catch(e){return{days:0,last:''}}}
-function saveStreak(s){localStorage.setItem(STK,JSON.stringify(s))}
-function todayStr(){return new Date().toISOString().slice(0,10)}
+/* ═══════════════════════════════════════════════════════════
+   STATE — localStorage
+═══════════════════════════════════════════════════════════ */
+var SK  = 'lk_it';
+var STK = 'lk_itst';
+var NEW_LIMIT = 10;
 
-function sm2(prev,q){
-  var ef=prev.ef!==undefined?prev.ef:2.5,n=prev.reps!==undefined?prev.reps:0,int=prev.interval||0;
-  if(q>=3){if(n===0)int=1;else if(n===1)int=6;else int=Math.round(int*ef);n++;ef=Math.max(1.3,ef+0.1-(5-q)*(0.08+(5-q)*0.02));}
-  else{int=1;n=0;}
-  return{ef:ef,interval:int,reps:n,due:Date.now()+int*86400000,total:(prev.total||0)+1};
+function loadState(){ try{ return JSON.parse(localStorage.getItem(SK)||'{}'); }catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(SK, JSON.stringify(s)); }
+function loadStreak(){ try{ return JSON.parse(localStorage.getItem(STK)||'{"days":0,"last":""}'); }catch(e){ return {days:0,last:''}; } }
+function saveStreak(s){ localStorage.setItem(STK, JSON.stringify(s)); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/* ═══════════════════════════════════════════════════════════
+   SM-2 ALGORITHM
+═══════════════════════════════════════════════════════════ */
+function sm2(prev, q){
+  var ef  = prev.ef   !== undefined ? prev.ef   : 2.5;
+  var n   = prev.reps !== undefined ? prev.reps : 0;
+  var int = prev.interval || 0;
+  if(q >= 3){
+    if(n === 0)      int = 1;
+    else if(n === 1) int = 6;
+    else             int = Math.round(int * ef);
+    n++;
+    ef = Math.max(1.3, ef + 0.1 - (5-q)*(0.08 + (5-q)*0.02));
+  } else {
+    int = 1; n = 0;
+  }
+  return { ef:ef, interval:int, reps:n, due:Date.now()+int*86400000, total:(prev.total||0)+1 };
 }
 
-var currentMode='flip',pendingCat=null;
-var sess={queue:[],idx:0,got:0,almost:0,missed:0},flipped=false;
-var speedTimerId=null,speedTimeLeft=60,speedCorrect=0,speedTotal=0,SPEED_SECS=60;
+/* ═══════════════════════════════════════════════════════════
+   MODE STATE
+═══════════════════════════════════════════════════════════ */
+var currentMode = 'flip';
+var pendingCat  = null;
 
-function buildQueue(cat){
-  var now=Date.now(),state=loadState(),reviews=[],newCards=[],future=[];
+/* ═══════════════════════════════════════════════════════════
+   SESSION STATE
+═══════════════════════════════════════════════════════════ */
+var sess    = {queue:[], idx:0, got:0, almost:0, missed:0};
+var flipped = false;
+
+/* ═══════════════════════════════════════════════════════════
+   SPEED ROUND STATE
+═══════════════════════════════════════════════════════════ */
+var speedTimerId  = null;
+var speedTimeLeft = 60;
+var speedCorrect  = 0;
+var speedTotal    = 0;
+var SPEED_SECS    = 60;
+
+/* ═══════════════════════════════════════════════════════════
+   QUEUE BUILDING
+═══════════════════════════════════════════════════════════ */
+function buildQueue(filterCat){
+  var now = Date.now();
+  var state = loadState();
+  var reviews=[], newCards=[], future=[];
   WORDS.forEach(function(w){
-    if(cat&&w.cat!==cat)return;
-    var s=state[w.id];
-    if(s&&s.due&&s.due<=now)reviews.push(w);
-    else if(!s)newCards.push(w);
-    else future.push(w);
+    if(filterCat && w.cat !== filterCat) return;
+    var s = state[w.id];
+    if(s && s.due && s.due <= now) reviews.push(w);
+    else if(!s)                    newCards.push(w);
+    else                           future.push(w);
   });
-  shuffle(reviews);shuffle(newCards);
-  var maxNew=cat?newCards.length:Math.min(NEW_LIMIT,newCards.length);
-  var queue=reviews.concat(newCards.slice(0,maxNew));
-  if(cat&&queue.length===0){shuffle(future);return future;}
+  shuffle(reviews); shuffle(newCards);
+  var maxNew = filterCat ? newCards.length : Math.min(NEW_LIMIT, newCards.length);
+  var queue  = reviews.concat(newCards.slice(0, maxNew));
+  if(filterCat && queue.length === 0){ shuffle(future); return future; }
   return queue;
 }
-function buildSpeedQueue(){var a=WORDS.slice();shuffle(a);return a;}
-function shuffle(arr){for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=arr[i];arr[i]=arr[j];arr[j]=t;}}
 
-function show(id){document.querySelectorAll('.scr').forEach(function(el){el.classList.remove('on');});document.getElementById(id).classList.add('on');}
-function goHome(){clearSpeedTimer();show('sHome');renderHome();}
-function openModeScreen(cat){pendingCat=cat;show('sMode');}
-function launchMode(mode){currentMode=mode;if(mode==='speed')startSpeed();else startSession(pendingCat);}
-function exitStudy(){clearSpeedTimer();goHome();}
+function buildSpeedQueue(){
+  var all = WORDS.slice();
+  shuffle(all);
+  return all;
+}
 
+function shuffle(arr){
+  for(var i=arr.length-1; i>0; i--){
+    var j=Math.floor(Math.random()*(i+1)), t=arr[i]; arr[i]=arr[j]; arr[j]=t;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN SWITCHING
+═══════════════════════════════════════════════════════════ */
+function show(id){
+  document.querySelectorAll('.scr').forEach(function(el){ el.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+function goHome(){
+  clearSpeedTimer();
+  show('sHome');
+  renderHome();
+}
+
+function openModeScreen(cat){
+  pendingCat = cat;
+  show('sMode');
+}
+
+function launchMode(mode){
+  currentMode = mode;
+  if(mode === 'speed'){
+    startSpeed();
+  } else {
+    startSession(pendingCat);
+  }
+}
+
+function exitStudy(){
+  clearSpeedTimer();
+  goHome();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME RENDER
+═══════════════════════════════════════════════════════════ */
 function renderHome(){
-  var now=Date.now(),state=loadState(),streak=loadStreak(),learned=0,due=0,newCount=0;
-  WORDS.forEach(function(w){var s=state[w.id];if(s){learned++;if(s.due<=now)due++;}else newCount++;});
-  document.getElementById('statLearned').textContent=learned;
-  document.getElementById('statDue').textContent=due;
-  document.getElementById('statNew').textContent=Math.min(newCount,NEW_LIMIT);
-  document.getElementById('streakPill').textContent='🔥 '+streak.days;
-  var sz=due+Math.min(newCount,NEW_LIMIT),cta=document.getElementById('ctaMain'),ct=document.getElementById('ctaText');
-  if(sz>0){var p=[];if(due>0)p.push(due+' review'+(due===1?'':'s'));if(newCount>0)p.push(Math.min(newCount,NEW_LIMIT)+' new');ct.textContent='Study '+sz+' cards ('+p.join(' + ')+')';cta.classList.remove('dim');}
-  else{ct.textContent='All done today ✓';cta.classList.add('dim');}
+  var now=Date.now(), state=loadState(), streak=loadStreak();
+  var learned=0, due=0, newCount=0;
+  WORDS.forEach(function(w){
+    var s=state[w.id];
+    if(s){ learned++; if(s.due<=now) due++; } else newCount++;
+  });
+  document.getElementById('statLearned').textContent = learned;
+  document.getElementById('statDue').textContent     = due;
+  document.getElementById('statNew').textContent     = Math.min(newCount, NEW_LIMIT);
+  document.getElementById('streakPill').textContent  = '🔥 ' + streak.days;
+
+  var sessionSize = due + Math.min(newCount, NEW_LIMIT);
+  var cta=document.getElementById('ctaMain'), ctaText=document.getElementById('ctaText');
+  if(sessionSize > 0){
+    var parts=[];
+    if(due>0)      parts.push(due+' review'+(due===1?'':'s'));
+    if(newCount>0) parts.push(Math.min(newCount,NEW_LIMIT)+' new');
+    ctaText.textContent = 'Study '+sessionSize+' cards ('+parts.join(' + ')+')';
+    cta.classList.remove('dim');
+  } else {
+    ctaText.textContent = 'All done today ✓';
+    cta.classList.add('dim');
+  }
+
   var html='';
   Object.keys(CATS).forEach(function(key){
-    var cat=CATS[key],words=WORDS.filter(function(w){return w.cat===key;});
-    var catDue=words.filter(function(w){var s=state[w.id];return s&&s.due<=now;}).length;
-    var catNew=words.filter(function(w){return!state[w.id];}).length;
-    html+='<div class="cat-card'+(catDue>0?' has-due':'')+'" onclick="openModeScreen(\''+key+'\')"><span class="cat-em">'+cat.em+'</span><span class="cat-name">'+cat.name+'</span><span class="cat-prog">'+(words.length-catNew)+' / '+words.length+'</span>'+(catDue>0?'<span class="cat-due-badge">'+catDue+' due</span>':'')+'</div>';
+    var cat=CATS[key];
+    var words=WORDS.filter(function(w){ return w.cat===key; });
+    var catDue=words.filter(function(w){ var s=state[w.id]; return s&&s.due<=now; }).length;
+    var catNew=words.filter(function(w){ return !state[w.id]; }).length;
+    var catLearned=words.length-catNew;
+    html+='<div class="cat-card'+(catDue>0?' has-due':'')+'" onclick="openModeScreen(\''+key+'\')">'
+      +'<span class="cat-em">'+cat.em+'</span>'
+      +'<span class="cat-name">'+cat.name+'</span>'
+      +'<span class="cat-prog">'+catLearned+' / '+words.length+'</span>'
+      +(catDue>0?'<span class="cat-due-badge">'+catDue+' due</span>':'')
+      +'</div>';
   });
-  document.getElementById('catGrid').innerHTML=html;
+  document.getElementById('catGrid').innerHTML = html;
 }
 
-function startSession(cat){
-  var queue=buildQueue(cat);if(!queue.length)return;
-  sess.queue=queue;sess.idx=0;sess.got=0;sess.almost=0;sess.missed=0;
-  show('sStudy');setupStudyUI();showCardForMode();
+/* ═══════════════════════════════════════════════════════════
+   STUDY SESSION
+═══════════════════════════════════════════════════════════ */
+function startSession(filterCat){
+  var queue = buildQueue(filterCat);
+  if(!queue.length) return;
+  sess.queue=queue; sess.idx=0; sess.got=0; sess.almost=0; sess.missed=0;
+  show('sStudy');
+  setupStudyUI();
+  showCardForMode();
 }
+
 function setupStudyUI(){
-  var m=currentMode,isF=m==='flip',isI=m==='type'||m==='gap',isC=m==='choice'||m==='speed';
-  document.getElementById('cardScene').style.display=isF?'':'none';
-  document.getElementById('inputPanel').style.display=isI?'flex':'none';
-  document.getElementById('choicePanel').style.display=isC?'flex':'none';
+  var mode = currentMode;
+  var isFlip   = mode === 'flip';
+  var isInput  = mode === 'type' || mode === 'gap';
+  var isChoice = mode === 'choice' || mode === 'speed';
+
+  document.getElementById('cardScene').style.display  = isFlip   ? '' : 'none';
+  document.getElementById('inputPanel').style.display = isInput  ? 'flex' : 'none';
+  document.getElementById('choicePanel').style.display= isChoice ? 'flex' : 'none';
   document.getElementById('answerWrap').classList.remove('show');
   document.getElementById('timerWrap').classList.remove('show');
-  if(isI)document.getElementById('inputModeLbl').textContent=m==='gap'?'Complete the sentence':'Translate to Italian';
-  if(m==='choice')document.getElementById('choiceModeLbl').textContent='What is this in Italian?';
+
+  if(isInput){
+    document.getElementById('inputModeLbl').textContent =
+      mode === 'gap' ? 'Complete the sentence' : 'Translate to Italian';
+    document.getElementById('choiceModeLbl').textContent = '';
+  }
+  if(mode === 'choice'){
+    document.getElementById('choiceModeLbl').textContent = 'What is this in Italian?';
+  }
 }
+
 function showCardForMode(){
-  var card=sess.queue[sess.idx];if(!card){endSession();return;}
-  if(currentMode==='flip')showFlipCard(card);
-  else if(currentMode==='type')showTypeCard(card);
-  else if(currentMode==='gap')showGapCard(card);
-  else if(currentMode==='choice')showChoiceCard(card,false);
+  var card = sess.queue[sess.idx];
+  if(!card){ endSession(); return; }
+  if(currentMode === 'flip')         showFlipCard(card);
+  else if(currentMode === 'type')    showTypeCard(card);
+  else if(currentMode === 'gap')     showGapCard(card);
+  else if(currentMode === 'choice')  showChoiceCard(card, false);
   updateProg();
 }
+
 function updateProg(){
-  var total=currentMode==='speed'?speedTotal:sess.queue.length,idx=currentMode==='speed'?speedTotal:sess.idx;
-  document.getElementById('progFill').style.width=(total>0?(idx/total*100):0)+'%';
-  document.getElementById('progLbl').textContent=idx+' / '+total;
+  var total = currentMode === 'speed' ? speedTotal : sess.queue.length;
+  var idx   = currentMode === 'speed' ? speedTotal : sess.idx;
+  var pct   = total > 0 ? (idx/total*100) : 0;
+  document.getElementById('progFill').style.width  = pct+'%';
+  document.getElementById('progLbl').textContent   = idx+' / '+total;
 }
 
+/* ── Flip mode ────────────────────────────────────────── */
 function showFlipCard(card){
-  flipped=false;
+  flipped = false;
   document.getElementById('cardWrap').classList.remove('flipped');
   document.getElementById('answerWrap').classList.remove('show');
-  var state=loadState(),isNew=!state[card.id],cat=CATS[card.cat]||{};
+  var state=loadState(), isNew=!state[card.id], cat=CATS[card.cat]||{};
   var badge=(cat.em||'')+' '+(cat.name||card.cat);
-  document.getElementById('cardBadge').textContent=badge;
-  document.getElementById('cardBadge2').textContent=badge;
-  document.getElementById('cardWord').textContent=card.it;
-  document.getElementById('cardPron').textContent='('+card.pron+')';
-  document.getElementById('cardEn').textContent=card.en;
-  document.getElementById('cardPronBack').textContent='('+card.pron+')';
-  document.getElementById('cardEg').textContent=card.eg;
-  document.getElementById('newBadge').style.display=isNew?'block':'none';
+  document.getElementById('cardBadge').textContent  = badge;
+  document.getElementById('cardBadge2').textContent = badge;
+  document.getElementById('cardWord').textContent   = card.it;
+  document.getElementById('cardPron').textContent   = '('+card.pron+')';
+  document.getElementById('cardEn').textContent     = card.en;
+  document.getElementById('cardPronBack').textContent = '('+card.pron+')';
+  document.getElementById('cardEg').textContent     = card.eg;
+  document.getElementById('cardEgEn').textContent   = card.egEn ? '→ '+card.egEn : '';
+  var noteEl = document.getElementById('cardNote');
+  if(card.note){ noteEl.textContent='💡 '+card.note; noteEl.style.display='block'; }
+  else { noteEl.style.display='none'; }
+  document.getElementById('newBadge').style.display = isNew ? 'block' : 'none';
 }
-function flipCard(){if(currentMode!=='flip'||flipped)return;flipped=true;document.getElementById('cardWrap').classList.add('flipped');document.getElementById('answerWrap').classList.add('show');}
 
+function flipCard(){
+  if(currentMode !== 'flip' || flipped) return;
+  flipped = true;
+  document.getElementById('cardWrap').classList.add('flipped');
+  document.getElementById('answerWrap').classList.add('show');
+}
+
+/* ── Type It mode ─────────────────────────────────────── */
 function showTypeCard(card){
-  document.getElementById('inputPanel').style.display='flex';
-  document.getElementById('inputPrompt').textContent=card.en;
-  document.getElementById('gapSentence').style.display='none';
+  document.getElementById('inputPanel').style.display = 'flex';
+  document.getElementById('inputPrompt').textContent  = card.en;
+  document.getElementById('gapSentence').style.display = 'none';
+  document.getElementById('gapHint').style.display   = 'none';
+  document.getElementById('gapEgEn').classList.remove('show');
+  document.getElementById('gapEgEn').textContent = '';
   resetInputPanel();
 }
+
+/* ── Fill the Gap mode ────────────────────────────────── */
 function showGapCard(card){
-  document.getElementById('inputPanel').style.display='flex';
-  var gap=buildGapSentence(card);
-  document.getElementById('inputPrompt').textContent='';
-  var gapEl=document.getElementById('gapSentence');
-  gapEl.style.display='block';gapEl.innerHTML=gap;
+  document.getElementById('inputPanel').style.display = 'flex';
+  document.getElementById('inputPrompt').textContent  = '';
+
+  var hintEl = document.getElementById('gapHint');
+  hintEl.textContent = 'Missing word means: "' + card.en + '"';
+  hintEl.style.display = 'block';
+
+  var gapEgEnEl = document.getElementById('gapEgEn');
+  gapEgEnEl.textContent = card.egEn ? '→ ' + card.egEn : '';
+  gapEgEnEl.classList.remove('show');
+
+  var gap = buildGapSentence(card);
+  var gapEl = document.getElementById('gapSentence');
+  gapEl.style.display = 'block';
+  gapEl.innerHTML = gap;
   resetInputPanel();
 }
+
 function buildGapSentence(card){
-  var sentence=card.eg,word=card.it.replace(/[.?!…]+$/,'').trim();
-  var re=new RegExp(escapeRe(word),'i');
-  if(re.test(sentence))return sentence.replace(re,'<b>____</b>');
-  var parts=word.split(/\s+/).filter(function(w){return w.length>3;});
-  for(var i=0;i<parts.length;i++){var re2=new RegExp(escapeRe(parts[i]),'i');if(re2.test(sentence))return sentence.replace(re2,'<b>____</b>');}
-  document.getElementById('inputPrompt').textContent=card.en;
-  document.getElementById('gapSentence').style.display='none';
-  return'';
+  var sentence = card.eg;
+  var word     = card.it.replace(/[.?!…]+$/, '').trim();
+
+  var re = new RegExp(escapeRe(word), 'i');
+  if(re.test(sentence)){
+    return sentence.replace(re, '<b>____</b>');
+  }
+  var parts = word.split(/\s+/).filter(function(w){ return w.length > 3; });
+  for(var i=0; i<parts.length; i++){
+    var re2 = new RegExp(escapeRe(parts[i]), 'i');
+    if(re2.test(sentence)){
+      return sentence.replace(re2, '<b>____</b>');
+    }
+  }
+  document.getElementById('inputPrompt').textContent = card.en;
+  document.getElementById('gapSentence').style.display = 'none';
+  return '';
 }
-function escapeRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+function escapeRe(s){
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function resetInputPanel(){
-  var f=document.getElementById('typeField');f.value='';f.className='type-field';f.disabled=false;
-  document.getElementById('submitBtn').disabled=false;
+  var field = document.getElementById('typeField');
+  field.value = '';
+  field.className = 'type-field';
+  field.disabled = false;
+  document.getElementById('submitBtn').disabled = false;
   document.getElementById('inputReveal').classList.remove('show');
   document.getElementById('answerWrap').classList.remove('show');
-  setTimeout(function(){f.focus();},100);
+  setTimeout(function(){ field.focus(); }, 100);
 }
-function onTypeInput(){document.getElementById('typeField').className='type-field';}
+
+function onTypeInput(){
+  document.getElementById('typeField').className = 'type-field';
+}
+
 function submitTyped(){
-  var card=sess.queue[sess.idx];if(!card)return;
-  var f=document.getElementById('typeField'),typed=f.value.trim();if(!typed)return;
-  var correct=card.it,isMatch=normalise(typed)===normalise(correct);
-  f.className='type-field '+(isMatch?'correct':'wrong');f.disabled=true;
-  document.getElementById('submitBtn').disabled=true;
-  var rw=document.getElementById('inputRevealWord'),rn=document.getElementById('inputRevealNote');
-  rw.textContent=correct;rw.className='input-reveal-word'+(isMatch?'':' miss');
-  rn.textContent=isMatch?'Correct! ✓':'You typed: "'+typed+'"';
+  var card   = sess.queue[sess.idx];
+  if(!card) return;
+  var field  = document.getElementById('typeField');
+  var typed  = field.value.trim();
+  if(!typed) return;
+
+  var correct = card.it;
+  var isMatch = normalise(typed) === normalise(correct);
+
+  field.className = 'type-field ' + (isMatch ? 'correct' : 'wrong');
+  field.disabled  = true;
+  document.getElementById('submitBtn').disabled = true;
+
+  var revealWord = document.getElementById('inputRevealWord');
+  var revealNote = document.getElementById('inputRevealNote');
+  var revealEg   = document.getElementById('inputRevealEg');
+  revealWord.textContent = correct;
+  revealWord.className   = 'input-reveal-word' + (isMatch ? '' : ' miss');
+  revealNote.textContent = isMatch ? 'Correct! ✓' : 'You typed: "' + typed + '"';
+
+  if(currentMode === 'type' && card.eg){
+    revealEg.textContent = card.eg + (card.egEn ? ' — ' + card.egEn : '');
+  } else {
+    revealEg.textContent = '';
+  }
+  if(currentMode === 'gap'){
+    document.getElementById('gapEgEn').classList.add('show');
+  }
+
   document.getElementById('inputReveal').classList.add('show');
   document.getElementById('answerWrap').classList.add('show');
 }
-function normalise(s){return s.toLowerCase().trim().replace(/[àá]/g,'a').replace(/[èé]/g,'e').replace(/[ìí]/g,'i').replace(/[òó]/g,'o').replace(/[ùú]/g,'u').replace(/[.?!…]+$/,'');}
 
-function showChoiceCard(card,speedMode){
-  document.getElementById('choicePrompt').textContent=card.en;
-  var pool=speedMode?WORDS.filter(function(w){return w.id!==card.id;}):sess.queue.filter(function(w){return w.id!==card.id;});
-  if(pool.length<3)pool=WORDS.filter(function(w){return w.id!==card.id;});
-  shuffle(pool);
-  var options=[card].concat(pool.slice(0,3));shuffle(options);
-  var html='';
-  options.forEach(function(opt,i){html+='<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+')">'+esc(opt.it)+'</button>';});
-  document.getElementById('choiceGrid').innerHTML=html;
+function normalise(s){
+  return s.toLowerCase().trim()
+    .replace(/[àá]/g,'a').replace(/[èé]/g,'e').replace(/[ìí]/g,'i')
+    .replace(/[òó]/g,'o').replace(/[ùú]/g,'u')
+    .replace(/[.?!…]+$/, '');
 }
-function chooseAnswer(btnIdx,correctId,chosenId){
-  var btns=document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
-  btns.forEach(function(b){b.disabled=true;});
-  var isCorrect=chosenId===correctId;
-  btns[btnIdx].classList.add(isCorrect?'correct':'wrong');
-  if(!isCorrect){var cw=getWordById(correctId).it;btns.forEach(function(b){if(b.textContent.trim()===cw)b.classList.add('reveal');});}
-  var q=isCorrect?5:1;
-  if(currentMode==='speed'){
-    speedTotal++;if(isCorrect)speedCorrect++;updateSpeedScore();updateProg();
+
+/* ── 4-Choice mode ────────────────────────────────────── */
+function showChoiceCard(card, speedMode){
+  document.getElementById('choicePrompt').textContent = card.en;
+
+  var pool = speedMode
+    ? WORDS.filter(function(w){ return w.id !== card.id; })
+    : sess.queue.filter(function(w){ return w.id !== card.id; });
+
+  if(pool.length < 3){
+    pool = WORDS.filter(function(w){ return w.id !== card.id; });
+  }
+
+  shuffle(pool);
+  var distractors = pool.slice(0, 3);
+  var options = [card].concat(distractors);
+  shuffle(options);
+
+  var html = '';
+  options.forEach(function(opt, i){
+    html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+')">'
+      + esc(opt.it)
+      + '</button>';
+  });
+  document.getElementById('choiceGrid').innerHTML = html;
+}
+
+function chooseAnswer(btnIdx, correctId, chosenId){
+  var btns = document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
+  btns.forEach(function(b){ b.disabled = true; });
+
+  var isCorrect = (chosenId === correctId);
+
+  btns[btnIdx].classList.add(isCorrect ? 'correct' : 'wrong');
+
+  if(!isCorrect){
+    btns.forEach(function(b){
+      if(b.textContent.trim() === getWordById(correctId).it){
+        b.classList.add('reveal');
+      }
+    });
+  }
+
+  var q = isCorrect ? 5 : 1;
+
+  if(currentMode === 'speed'){
+    speedTotal++;
+    if(isCorrect) speedCorrect++;
+    updateSpeedScore();
+    updateProg();
     setTimeout(function(){
-      var next=sess.queue[sess.idx];if(!next)return;
-      var state=loadState();state[next.id]=sm2(state[next.id]||{},q);saveState(state);
-      sess.idx++;var nc=sess.queue[sess.idx];if(nc)showChoiceCard(nc,true);
-    },450);
+      var next = sess.queue[sess.idx];
+      if(!next) return;
+      var state = loadState();
+      state[next.id] = sm2(state[next.id]||{}, q);
+      saveState(state);
+      sess.idx++;
+      var nextCard = sess.queue[sess.idx];
+      if(nextCard){
+        showChoiceCard(nextCard, true);
+      }
+    }, 450);
   } else {
     setTimeout(function(){
-      var card=sess.queue[sess.idx];if(!card)return;
-      var state=loadState();state[card.id]=sm2(state[card.id]||{},q);saveState(state);
-      if(isCorrect)sess.got++;else sess.missed++;sess.idx++;showCardForMode();
-    },600);
+      var card = sess.queue[sess.idx];
+      if(!card) return;
+      var state = loadState();
+      state[card.id] = sm2(state[card.id]||{}, q);
+      saveState(state);
+      if(isCorrect) sess.got++; else sess.missed++;
+      sess.idx++;
+      showCardForMode();
+    }, 600);
   }
 }
-function getWordById(id){for(var i=0;i<WORDS.length;i++){if(WORDS[i].id===id)return WORDS[i];}return WORDS[0];}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+function getWordById(id){
+  for(var i=0; i<WORDS.length; i++){ if(WORDS[i].id===id) return WORDS[i]; }
+  return WORDS[0];
+}
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANSWER (flip + input modes)
+═══════════════════════════════════════════════════════════ */
 function answer(q){
-  var card=sess.queue[sess.idx];if(!card)return;
-  if(currentMode==='flip'&&!flipped)return;
-  var state=loadState();state[card.id]=sm2(state[card.id]||{},q);saveState(state);
-  if(q===5)sess.got++;else if(q===3)sess.almost++;else sess.missed++;
-  sess.idx++;showCardForMode();
+  var card = sess.queue[sess.idx];
+  if(!card) return;
+  if(currentMode === 'flip' && !flipped) return;
+
+  var state = loadState();
+  state[card.id] = sm2(state[card.id]||{}, q);
+  saveState(state);
+
+  if(q===5)       sess.got++;
+  else if(q===3)  sess.almost++;
+  else            sess.missed++;
+
+  sess.idx++;
+  showCardForMode();
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SPEED ROUND
+═══════════════════════════════════════════════════════════ */
 function startSpeed(){
-  var queue=buildSpeedQueue();
-  sess.queue=queue;sess.idx=0;sess.got=0;sess.almost=0;sess.missed=0;
-  speedTimeLeft=SPEED_SECS;speedCorrect=0;speedTotal=0;
+  var queue = buildSpeedQueue();
+  sess.queue=queue; sess.idx=0; sess.got=0; sess.almost=0; sess.missed=0;
+  speedTimeLeft=SPEED_SECS; speedCorrect=0; speedTotal=0;
+
   show('sStudy');
-  document.getElementById('cardScene').style.display='none';
-  document.getElementById('inputPanel').style.display='none';
-  document.getElementById('choicePanel').style.display='flex';
+  document.getElementById('cardScene').style.display   = 'none';
+  document.getElementById('inputPanel').style.display  = 'none';
+  document.getElementById('choicePanel').style.display = 'flex';
   document.getElementById('answerWrap').classList.remove('show');
-  document.getElementById('choiceModeLbl').textContent='⚡ What is this in Italian?';
+  document.getElementById('choiceModeLbl').textContent = '⚡ What is this in Italian?';
   document.getElementById('timerWrap').classList.add('show');
-  document.getElementById('progFill').style.width='0%';
-  document.getElementById('progLbl').textContent='0 / 0';
-  updateSpeedTimer();showChoiceCard(sess.queue[0],true);
-  speedTimerId=setInterval(function(){speedTimeLeft--;updateSpeedTimer();if(speedTimeLeft<=0){clearSpeedTimer();endSpeedRound();}},1000);
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('progLbl').textContent  = '0 / 0';
+
+  updateSpeedTimer();
+  showChoiceCard(sess.queue[0], true);
+
+  speedTimerId = setInterval(function(){
+    speedTimeLeft--;
+    updateSpeedTimer();
+    if(speedTimeLeft <= 0){
+      clearSpeedTimer();
+      endSpeedRound();
+    }
+  }, 1000);
 }
+
 function updateSpeedTimer(){
-  var pct=(speedTimeLeft/SPEED_SECS)*100;
-  document.getElementById('timerFill').style.width=pct+'%';
-  document.getElementById('timerCount').textContent='0:'+(speedTimeLeft<10?'0':'')+speedTimeLeft;
+  var pct = (speedTimeLeft / SPEED_SECS) * 100;
+  document.getElementById('timerFill').style.width   = pct + '%';
+  document.getElementById('timerCount').textContent  = '0:' + (speedTimeLeft < 10 ? '0' : '') + speedTimeLeft;
   updateSpeedScore();
 }
-function updateSpeedScore(){document.getElementById('timerScore').textContent=speedCorrect+' correct';}
-function clearSpeedTimer(){if(speedTimerId){clearInterval(speedTimerId);speedTimerId=null;}}
+
+function updateSpeedScore(){
+  document.getElementById('timerScore').textContent = speedCorrect + ' correct';
+}
+
+function clearSpeedTimer(){
+  if(speedTimerId){ clearInterval(speedTimerId); speedTimerId=null; }
+}
+
 function endSpeedRound(){
-  var pct=speedTotal>0?Math.round(speedCorrect/speedTotal*100):0;
-  document.getElementById('doneTitle').textContent='Speed Round!';
-  document.getElementById('doneEm').textContent=pct>=80?'🏆':pct>=50?'⚡':'💪';
-  document.getElementById('doneTotal').textContent=speedTotal;
-  document.getElementById('doneGot').textContent=speedCorrect;
-  document.getElementById('doneMissed').textContent=speedTotal-speedCorrect;
-  document.getElementById('doneSub').textContent=pct+'% accuracy in 60 seconds. '+(pct>=80?'Fantastico!':pct>=50?'Good effort!':'Keep practising!');
+  var pct = speedTotal > 0 ? Math.round(speedCorrect/speedTotal*100) : 0;
+  document.getElementById('doneTitle').textContent   = 'Speed Round!';
+  document.getElementById('doneEm').textContent      = pct>=80?'🏆':pct>=50?'⚡':'💪';
+  document.getElementById('doneTotal').textContent   = speedTotal;
+  document.getElementById('doneGot').textContent     = speedCorrect;
+  document.getElementById('doneMissed').textContent  = speedTotal-speedCorrect;
+  document.getElementById('doneSub').textContent     = pct+'% accuracy in 60 seconds. '+(pct>=80?'Fantastico!':pct>=50?'Good effort!':'Keep practising!');
   show('sDone');
 }
 
+/* ═══════════════════════════════════════════════════════════
+   DONE SCREEN (standard sessions)
+═══════════════════════════════════════════════════════════ */
 function endSession(){
-  var today=todayStr(),streak=loadStreak();
-  if(streak.last!==today){var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);streak.days=(streak.last===yesterday)?streak.days+1:1;streak.last=today;saveStreak(streak);}
-  var total=sess.got+sess.almost+sess.missed,pct=total>0?Math.round(sess.got/total*100):0;
-  document.getElementById('doneTitle').textContent='Session done!';
-  document.getElementById('doneEm').textContent=pct>=80?'🎉':pct>=50?'💪':'📚';
-  document.getElementById('doneTotal').textContent=total;
-  document.getElementById('doneGot').textContent=sess.got;
-  document.getElementById('doneMissed').textContent=sess.missed;
-  var msgs=['Spaced repetition works — your brain will consolidate these overnight.','The Ebbinghaus curve is on your side. Come back tomorrow.','Every review builds the neural path. Bravissimo!','Consistency beats intensity. Same time tomorrow?',"You're building real fluency one card at a time."];
-  document.getElementById('doneSub').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  var today=todayStr(), streak=loadStreak();
+  if(streak.last !== today){
+    var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+    streak.days = (streak.last===yesterday) ? streak.days+1 : 1;
+    streak.last = today;
+    saveStreak(streak);
+  }
+
+  var total=sess.got+sess.almost+sess.missed;
+  var pct  =total>0 ? Math.round(sess.got/total*100) : 0;
+
+  document.getElementById('doneTitle').textContent   = 'Session done!';
+  document.getElementById('doneEm').textContent      = pct>=80?'🎉':pct>=50?'💪':'📚';
+  document.getElementById('doneTotal').textContent   = total;
+  document.getElementById('doneGot').textContent     = sess.got;
+  document.getElementById('doneMissed').textContent  = sess.missed;
+
+  var msgs=[
+    'Spaced repetition works — your brain will consolidate these overnight.',
+    'The Ebbinghaus curve is on your side. Come back tomorrow.',
+    'Every review builds the neural path. Bravissimo!',
+    'Consistency beats intensity. Same time tomorrow?',
+    "You're building real fluency one card at a time.",
+  ];
+  document.getElementById('doneSub').textContent = msgs[Math.floor(Math.random()*msgs.length)];
   show('sDone');
 }
 
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
 renderHome();
 </script>
 </body>
