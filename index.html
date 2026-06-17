@@ -81,6 +81,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .study-cta:active{transform:scale(.97);opacity:.9}
 .study-cta.dim{opacity:.45;pointer-events:none}
+.study-cta.practice{background:var(--s1);border:1px solid var(--bd);color:var(--tx)}
 .cta-arrow{font-size:22px;opacity:.8}
 
 /* ── Section label ────────────────────────────────────── */
@@ -520,7 +521,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   </div>
 
   <div class="cta-wrap">
-    <button class="study-cta" id="ctaMain" onclick="startSession(null)">
+    <button class="study-cta" id="ctaMain" onclick="handleMainCta()">
       <span id="ctaText">Start learning</span>
       <span class="cta-arrow">→</span>
     </button>
@@ -1118,6 +1119,14 @@ function buildSpeedQueue(){
   return all.map(function(c){ return { card:c, type:'choice' }; });
 }
 
+function buildPracticeQueue(filterCat){
+  var state=loadState();
+  var pool = WORDS.filter(function(w){ return !filterCat || w.cat===filterCat; });
+  shuffle(pool);
+  var cap = filterCat ? pool.length : Math.min(20, pool.length);
+  return pool.slice(0, cap).map(function(c){ return { card:c, type:getQuestionType(c, state, false) }; });
+}
+
 function shuffle(arr){
   for(var i=arr.length-1; i>0; i--){
     var j=Math.floor(Math.random()*(i+1)), t=arr[i]; arr[i]=arr[j]; arr[j]=t;
@@ -1188,10 +1197,13 @@ function renderHome(){
     if(due>0)      parts.push(due+' review'+(due===1?'':'s'));
     if(newCount>0) parts.push(Math.min(newCount,NEW_LIMIT)+' new');
     ctaText.textContent = 'Study '+sessionSize+' cards ('+parts.join(' + ')+')';
-    cta.classList.remove('dim');
+    cta.classList.remove('dim','practice');
+    ctaMode = 'study';
   } else {
-    ctaText.textContent = 'All done today ✓';
-    cta.classList.add('dim');
+    ctaText.textContent = 'All done — practice for fun →';
+    cta.classList.remove('dim');
+    cta.classList.add('practice');
+    ctaMode = 'practice';
   }
 
   var html='';
@@ -1214,8 +1226,32 @@ function renderHome(){
 /* ═══════════════════════════════════════════════════════════
    ADAPTIVE SESSION
 ═══════════════════════════════════════════════════════════ */
+var ctaMode = 'study';
+
+function handleMainCta(){
+  if(ctaMode === 'practice') startPractice(null);
+  else startSession(null);
+}
+
 function startSession(filterCat){
   var queue = buildAdaptiveQueue(filterCat);
+  if(!queue.length){ startPractice(filterCat); return; }
+
+  sess.queue        = queue;
+  sess.cleared      = 0;
+  sess.sessionTotal = queue.length;
+  sess.got          = 0;
+  sess.missed       = 0;
+  sess.retries      = {};
+  sess.streak       = 0;
+
+  show('sStudy');
+  document.getElementById('timerWrap').classList.remove('show');
+  showCurrentItem();
+}
+
+function startPractice(filterCat){
+  var queue = buildPracticeQueue(filterCat);
   if(!queue.length) return;
 
   sess.queue        = queue;
