@@ -464,6 +464,23 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   margin-bottom:8px;letter-spacing:.02em;
 }
 
+/* ── Language switcher ────────────────────────────────── */
+.lang-row{
+  display:flex;gap:8px;padding:14px 20px 0;
+}
+.lang-pill{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 8px;border-radius:12px;
+  background:var(--s1);border:1px solid var(--bd);
+  font-size:12px;font-weight:700;color:var(--tx2);
+  transition:transform .25s var(--spring),background .15s,border-color .15s,color .15s;
+  -webkit-user-select:none;user-select:none;cursor:pointer;
+}
+.lang-pill:active{transform:scale(.94)}
+.lang-pill.active{
+  background:var(--ac-dim);border-color:rgba(242,100,25,.35);color:var(--ac-tx);
+}
+
 /* ── Reduced motion ───────────────────────────────────── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -479,11 +496,13 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 
   <div class="home-top">
     <div>
-      <div class="home-eyebrow">Italy survival kit</div>
-      <div class="home-title">🇮🇹 <span>Italiano</span></div>
+      <div class="home-eyebrow" id="homeEyebrow">Italy survival kit</div>
+      <div class="home-title" id="homeTitle">🇮🇹 <span>Italiano</span></div>
     </div>
     <div class="streak-pill" id="streakPill">🔥 0</div>
   </div>
+
+  <div class="lang-row" id="langRow"></div>
 
   <div class="stats-row">
     <div class="stat-card">
@@ -649,8 +668,14 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
-   VOCABULARY DATA — 100 travel-essential Italian words
+   VOCABULARY DATA — 100 travel-essential words per language
 ═══════════════════════════════════════════════════════════ */
+
+var LANGS = {
+  it: { name:'Italiano',   flag:'🇮🇹', eyebrow:'Italy survival kit' },
+  de: { name:'Deutsch',    flag:'🇩🇪', eyebrow:'Germany & Austria survival kit' },
+  nl: { name:'Nederlands', flag:'🇳🇱', eyebrow:'Netherlands survival kit' },
+};
 
 var CATS = {
   basics:    {name:'Basics',     em:'🤝'},
@@ -664,135 +689,360 @@ var CATS = {
   time:      {name:'Time',       em:'⏰'},
 };
 
-var WORDS = [
+var WORDS_BY_LANG = { it: [], de: [], nl: [] };
+
+WORDS_BY_LANG.it = [
   // BASICS (15)
-  {id:0,  cat:'basics', it:'Ciao',            en:'Hello / Bye',           pron:'cha-oh',              eg:'Ciao! Come stai?',                      egEn:'Hi! How are you?',                        note:'Informal — use with friends, not with strangers or in shops.'},
-  {id:1,  cat:'basics', it:'Buongiorno',      en:'Good morning',          pron:'bwon-JOR-no',         eg:'Buongiorno! Un caffè, per favore.',      egEn:'Good morning! A coffee, please.'},
-  {id:2,  cat:'basics', it:'Buonasera',       en:'Good evening',          pron:'bwon-ah-SAY-rah',     eg:'Buonasera! Ha un tavolo libero?',        egEn:'Good evening! Do you have a free table?'},
-  {id:3,  cat:'basics', it:'Per favore',      en:'Please',                pron:'pair fah-VOH-ray',    eg:"Un'acqua, per favore.",                  egEn:'A water, please.'},
-  {id:4,  cat:'basics', it:'Grazie',          en:'Thank you',             pron:'GRAT-syeh',           eg:'Grazie mille!',                          egEn:'Thank you so much! (lit. a thousand thanks)'},
-  {id:5,  cat:'basics', it:'Prego',           en:"You're welcome",        pron:'PRAY-go',             eg:'"Grazie!" "Prego!"',                     egEn:'"Thank you!" "You\'re welcome!"',          note:'Also means "please go ahead" or "after you" — very versatile.'},
-  {id:6,  cat:'basics', it:'Scusa',           en:'Excuse me / Sorry',     pron:'SKOO-zah',            eg:"Scusa, dov'è il bagno?",                 egEn:"Excuse me, where's the bathroom?"},
-  {id:7,  cat:'basics', it:'Mi dispiace',     en:"I'm sorry",             pron:'mee dis-PYAH-chay',   eg:'Mi dispiace, non capisco.',              egEn:"I'm sorry, I don't understand."},
-  {id:8,  cat:'basics', it:'Sì',              en:'Yes',                   pron:'see',                 eg:'Sì, grazie!',                            egEn:'Yes, thank you!',                         note:'The accent is important — without it "si" is a reflexive pronoun.'},
-  {id:9,  cat:'basics', it:'No',              en:'No',                    pron:'no',                  eg:'No, grazie.',                            egEn:'No, thank you.'},
-  {id:10, cat:'basics', it:'Non capisco',     en:"I don't understand",    pron:'non kah-PEES-ko',     eg:'Scusa, non capisco. Parla più lento?',   egEn:"Excuse me, I don't understand. Can you speak more slowly?"},
-  {id:11, cat:'basics', it:'Parla inglese?',  en:'Do you speak English?', pron:'PAR-lah in-GLAY-zay', eg:'Parla inglese? Non parlo italiano bene.', egEn:"Do you speak English? I don't speak Italian well."},
-  {id:12, cat:'basics', it:'Quanto costa?',   en:'How much is it?',       pron:'KWAN-toh KOS-tah',    eg:'Quanto costa questo?',                   egEn:'How much does this cost?'},
-  {id:13, cat:'basics', it:"Dov'è...?",       en:'Where is...?',          pron:'doh-VEH',             eg:"Dov'è la stazione?",                     egEn:'Where is the station?'},
-  {id:14, cat:'basics', it:'Basta',           en:"That's enough / Stop",  pron:'BAS-tah',             eg:'Basta, grazie!',                         egEn:"That's enough, thank you!",               note:'Add "grazie" to soften it — alone it can sound quite blunt.'},
+  {id:0,  cat:'basics', term:'Ciao',            en:'Hello / Bye',           pron:'cha-oh',              eg:'Ciao! Come stai?',                      egEn:'Hi! How are you?',                        note:'Informal — use with friends, not with strangers or in shops.'},
+  {id:1,  cat:'basics', term:'Buongiorno',      en:'Good morning',          pron:'bwon-JOR-no',         eg:'Buongiorno! Un caffè, per favore.',      egEn:'Good morning! A coffee, please.'},
+  {id:2,  cat:'basics', term:'Buonasera',       en:'Good evening',          pron:'bwon-ah-SAY-rah',     eg:'Buonasera! Ha un tavolo libero?',        egEn:'Good evening! Do you have a free table?'},
+  {id:3,  cat:'basics', term:'Per favore',      en:'Please',                pron:'pair fah-VOH-ray',    eg:"Un'acqua, per favore.",                  egEn:'A water, please.'},
+  {id:4,  cat:'basics', term:'Grazie',          en:'Thank you',             pron:'GRAT-syeh',           eg:'Grazie mille!',                          egEn:'Thank you so much! (lit. a thousand thanks)'},
+  {id:5,  cat:'basics', term:'Prego',           en:"You're welcome",        pron:'PRAY-go',             eg:'"Grazie!" "Prego!"',                     egEn:'"Thank you!" "You\'re welcome!"',          note:'Also means "please go ahead" or "after you" — very versatile.'},
+  {id:6,  cat:'basics', term:'Scusa',           en:'Excuse me / Sorry',     pron:'SKOO-zah',            eg:"Scusa, dov'è il bagno?",                 egEn:"Excuse me, where's the bathroom?"},
+  {id:7,  cat:'basics', term:'Mi dispiace',     en:"I'm sorry",             pron:'mee dis-PYAH-chay',   eg:'Mi dispiace, non capisco.',              egEn:"I'm sorry, I don't understand."},
+  {id:8,  cat:'basics', term:'Sì',              en:'Yes',                   pron:'see',                 eg:'Sì, grazie!',                            egEn:'Yes, thank you!',                         note:'The accent is important — without it "si" is a reflexive pronoun.'},
+  {id:9,  cat:'basics', term:'No',              en:'No',                    pron:'no',                  eg:'No, grazie.',                            egEn:'No, thank you.'},
+  {id:10, cat:'basics', term:'Non capisco',     en:"I don't understand",    pron:'non kah-PEES-ko',     eg:'Scusa, non capisco. Parla più lento?',   egEn:"Excuse me, I don't understand. Can you speak more slowly?"},
+  {id:11, cat:'basics', term:'Parla inglese?',  en:'Do you speak English?', pron:'PAR-lah in-GLAY-zay', eg:'Parla inglese? Non parlo italiano bene.', egEn:"Do you speak English? I don't speak Italian well."},
+  {id:12, cat:'basics', term:'Quanto costa?',   en:'How much is it?',       pron:'KWAN-toh KOS-tah',    eg:'Quanto costa questo?',                   egEn:'How much does this cost?'},
+  {id:13, cat:'basics', term:"Dov'è...?",       en:'Where is...?',          pron:'doh-VEH',             eg:"Dov'è la stazione?",                     egEn:'Where is the station?'},
+  {id:14, cat:'basics', term:'Basta',           en:"That's enough / Stop",  pron:'BAS-tah',             eg:'Basta, grazie!',                         egEn:"That's enough, thank you!",               note:'Add "grazie" to soften it — alone it can sound quite blunt.'},
 
   // FOOD & DRINK (16)
-  {id:15, cat:'food', it:'Acqua',             en:'Water',                 pron:'AH-kwah',             eg:"Un'acqua naturale, per favore.",          egEn:'A still water, please.'},
-  {id:16, cat:'food', it:'Vino',              en:'Wine',                  pron:'VEE-no',              eg:'Un bicchiere di vino rosso.',             egEn:'A glass of red wine.'},
-  {id:17, cat:'food', it:'Birra',             en:'Beer',                  pron:'BEER-rah',            eg:'Una birra alla spina, per favore.',       egEn:'A draft beer, please.'},
-  {id:18, cat:'food', it:'Caffè',             en:'Coffee',                pron:'kah-FEH',             eg:'Un caffè, per favore.',                   egEn:'A coffee, please.',                       note:'In Italy "un caffè" means an espresso — ask for "caffè americano" for a long coffee.'},
-  {id:19, cat:'food', it:'Pane',              en:'Bread',                 pron:'PAH-nay',             eg:'Posso avere del pane?',                   egEn:'Can I have some bread?'},
-  {id:20, cat:'food', it:'Il conto',          en:'The bill',              pron:'eel KON-toh',         eg:'Il conto, per favore!',                   egEn:'The bill, please!'},
-  {id:21, cat:'food', it:'Un tavolo',         en:'A table',               pron:'oon TAH-vo-lo',       eg:'Un tavolo per due, per favore.',          egEn:'A table for two, please.'},
-  {id:22, cat:'food', it:'Menù',              en:'Menu',                  pron:'meh-NOO',             eg:'Posso vedere il menù?',                   egEn:'Can I see the menu?'},
-  {id:23, cat:'food', it:'Vegetariano',       en:'Vegetarian',            pron:'veh-jeh-tah-RYAH-no', eg:'Avete piatti vegetariani?',               egEn:'Do you have vegetarian dishes?'},
-  {id:24, cat:'food', it:'Senza glutine',     en:'Gluten free',           pron:'SEN-tsah GLOO-tee-nay',eg:'È senza glutine?',                      egEn:'Is it gluten free?'},
-  {id:25, cat:'food', it:'Allergia',          en:'Allergy',               pron:'ah-lair-JEE-ah',      eg:"Ho un'allergia alle noci.",               egEn:'I have a nut allergy.'},
-  {id:26, cat:'food', it:'Delizioso',         en:'Delicious',             pron:'deh-leet-SYOH-zo',    eg:'Questo è delizioso!',                     egEn:'This is delicious!'},
-  {id:27, cat:'food', it:'Cameriere',         en:'Waiter',                pron:'kah-mair-YEH-ray',    eg:'Cameriere! Il conto, per favore.',        egEn:'Waiter! The bill, please.',               note:'Male form. For a waitress say "Cameriera!" (kah-mair-YEH-rah).'},
-  {id:28, cat:'food', it:'Antipasto',         en:'Starter',               pron:'an-tee-PAS-toh',      eg:'Come antipasto, vorrei il prosciutto.',   egEn:'As a starter, I would like the ham.'},
-  {id:29, cat:'food', it:'Dolce',             en:'Dessert / Sweet',       pron:'DOL-chay',            eg:'Per dolce, un tiramisù per favore.',      egEn:'For dessert, a tiramisu please.',          note:'Also "la dolce vita" — the sweet life! Used as an adjective too.'},
-  {id:30, cat:'food', it:'Prenotazione',      en:'Reservation',           pron:'preh-no-tat-SYOH-nay',eg:'Ho una prenotazione per le 20:00.',       egEn:'I have a reservation for 8pm.'},
+  {id:15, cat:'food', term:'Acqua',             en:'Water',                 pron:'AH-kwah',             eg:"Un'acqua naturale, per favore.",          egEn:'A still water, please.'},
+  {id:16, cat:'food', term:'Vino',              en:'Wine',                  pron:'VEE-no',              eg:'Un bicchiere di vino rosso.',             egEn:'A glass of red wine.'},
+  {id:17, cat:'food', term:'Birra',             en:'Beer',                  pron:'BEER-rah',            eg:'Una birra alla spina, per favore.',       egEn:'A draft beer, please.'},
+  {id:18, cat:'food', term:'Caffè',             en:'Coffee',                pron:'kah-FEH',             eg:'Un caffè, per favore.',                   egEn:'A coffee, please.',                       note:'In Italy "un caffè" means an espresso — ask for "caffè americano" for a long coffee.'},
+  {id:19, cat:'food', term:'Pane',              en:'Bread',                 pron:'PAH-nay',             eg:'Posso avere del pane?',                   egEn:'Can I have some bread?'},
+  {id:20, cat:'food', term:'Il conto',          en:'The bill',              pron:'eel KON-toh',         eg:'Il conto, per favore!',                   egEn:'The bill, please!'},
+  {id:21, cat:'food', term:'Un tavolo',         en:'A table',               pron:'oon TAH-vo-lo',       eg:'Un tavolo per due, per favore.',          egEn:'A table for two, please.'},
+  {id:22, cat:'food', term:'Menù',              en:'Menu',                  pron:'meh-NOO',             eg:'Posso vedere il menù?',                   egEn:'Can I see the menu?'},
+  {id:23, cat:'food', term:'Vegetariano',       en:'Vegetarian',            pron:'veh-jeh-tah-RYAH-no', eg:'Avete piatti vegetariani?',               egEn:'Do you have vegetarian dishes?'},
+  {id:24, cat:'food', term:'Senza glutine',     en:'Gluten free',           pron:'SEN-tsah GLOO-tee-nay',eg:'È senza glutine?',                      egEn:'Is it gluten free?'},
+  {id:25, cat:'food', term:'Allergia',          en:'Allergy',               pron:'ah-lair-JEE-ah',      eg:"Ho un'allergia alle noci.",               egEn:'I have a nut allergy.'},
+  {id:26, cat:'food', term:'Delizioso',         en:'Delicious',             pron:'deh-leet-SYOH-zo',    eg:'Questo è delizioso!',                     egEn:'This is delicious!'},
+  {id:27, cat:'food', term:'Cameriere',         en:'Waiter',                pron:'kah-mair-YEH-ray',    eg:'Cameriere! Il conto, per favore.',        egEn:'Waiter! The bill, please.',               note:'Male form. For a waitress say "Cameriera!" (kah-mair-YEH-rah).'},
+  {id:28, cat:'food', term:'Antipasto',         en:'Starter',               pron:'an-tee-PAS-toh',      eg:'Come antipasto, vorrei il prosciutto.',   egEn:'As a starter, I would like the ham.'},
+  {id:29, cat:'food', term:'Dolce',             en:'Dessert / Sweet',       pron:'DOL-chay',            eg:'Per dolce, un tiramisù per favore.',      egEn:'For dessert, a tiramisu please.',          note:'Also "la dolce vita" — the sweet life! Used as an adjective too.'},
+  {id:30, cat:'food', term:'Prenotazione',      en:'Reservation',           pron:'preh-no-tat-SYOH-nay',eg:'Ho una prenotazione per le 20:00.',       egEn:'I have a reservation for 8pm.'},
 
   // DIRECTIONS (12)
-  {id:31, cat:'directions', it:'A sinistra',  en:'To the left',           pron:'ah see-NEES-trah',    eg:'Gira a sinistra alla piazza.',            egEn:'Turn left at the square.'},
-  {id:32, cat:'directions', it:'A destra',    en:'To the right',          pron:'ah DES-trah',         eg:'La stazione è a destra.',                 egEn:'The station is on the right.'},
-  {id:33, cat:'directions', it:'Dritto',      en:'Straight ahead',        pron:'DREET-toh',           eg:'Vai dritto per 200 metri.',               egEn:'Go straight for 200 metres.'},
-  {id:34, cat:'directions', it:'Gira',        en:'Turn',                  pron:'JEE-rah',             eg:'Gira a destra al semaforo.',              egEn:'Turn right at the traffic light.'},
-  {id:35, cat:'directions', it:'Qui',         en:'Here',                  pron:'KWEE',                eg:'Fermati qui, per favore.',                egEn:'Stop here, please.'},
-  {id:36, cat:'directions', it:'Lì',          en:'There',                 pron:'lee',                 eg:'Il ristorante è lì.',                     egEn:'The restaurant is there.'},
-  {id:37, cat:'directions', it:'Lontano',     en:'Far away',              pron:'lon-TAH-no',          eg:'È lontano? Posso andare a piedi?',        egEn:'Is it far? Can I walk there?'},
-  {id:38, cat:'directions', it:'Vicino',      en:'Near / Close',          pron:'vee-CHEE-no',         eg:'È vicino alla stazione.',                 egEn:"It's close to the station."},
-  {id:39, cat:'directions', it:'Strada',      en:'Street / Road',         pron:'STRAH-dah',           eg:'Qual è questa strada?',                   egEn:'What street is this?'},
-  {id:40, cat:'directions', it:'Piazza',      en:'Square / Plaza',        pron:'PYAT-tsah',           eg:'Ci troviamo in piazza?',                  egEn:'Shall we meet at the square?'},
-  {id:41, cat:'directions', it:'Centro',      en:'City centre',           pron:'CHEN-tro',            eg:'Come arrivo al centro?',                  egEn:'How do I get to the city centre?'},
-  {id:42, cat:'directions', it:'Mi sono perso',en:"I'm lost",             pron:'mee SOH-no PAIR-so',  eg:'Mi sono perso. Può aiutarmi?',            egEn:"I'm lost. Can you help me?",              note:'For a woman: "Mi sono persa" (PAIR-sah).'},
+  {id:31, cat:'directions', term:'A sinistra',  en:'To the left',           pron:'ah see-NEES-trah',    eg:'Gira a sinistra alla piazza.',            egEn:'Turn left at the square.'},
+  {id:32, cat:'directions', term:'A destra',    en:'To the right',          pron:'ah DES-trah',         eg:'La stazione è a destra.',                 egEn:'The station is on the right.'},
+  {id:33, cat:'directions', term:'Dritto',      en:'Straight ahead',        pron:'DREET-toh',           eg:'Vai dritto per 200 metri.',               egEn:'Go straight for 200 metres.'},
+  {id:34, cat:'directions', term:'Gira',        en:'Turn',                  pron:'JEE-rah',             eg:'Gira a destra al semaforo.',              egEn:'Turn right at the traffic light.'},
+  {id:35, cat:'directions', term:'Qui',         en:'Here',                  pron:'KWEE',                eg:'Fermati qui, per favore.',                egEn:'Stop here, please.'},
+  {id:36, cat:'directions', term:'Lì',          en:'There',                 pron:'lee',                 eg:'Il ristorante è lì.',                     egEn:'The restaurant is there.'},
+  {id:37, cat:'directions', term:'Lontano',     en:'Far away',              pron:'lon-TAH-no',          eg:'È lontano? Posso andare a piedi?',        egEn:'Is it far? Can I walk there?'},
+  {id:38, cat:'directions', term:'Vicino',      en:'Near / Close',          pron:'vee-CHEE-no',         eg:'È vicino alla stazione.',                 egEn:"It's close to the station."},
+  {id:39, cat:'directions', term:'Strada',      en:'Street / Road',         pron:'STRAH-dah',           eg:'Qual è questa strada?',                   egEn:'What street is this?'},
+  {id:40, cat:'directions', term:'Piazza',      en:'Square / Plaza',        pron:'PYAT-tsah',           eg:'Ci troviamo in piazza?',                  egEn:'Shall we meet at the square?'},
+  {id:41, cat:'directions', term:'Centro',      en:'City centre',           pron:'CHEN-tro',            eg:'Come arrivo al centro?',                  egEn:'How do I get to the city centre?'},
+  {id:42, cat:'directions', term:'Mi sono perso',en:"I'm lost",             pron:'mee SOH-no PAIR-so',  eg:'Mi sono perso. Può aiutarmi?',            egEn:"I'm lost. Can you help me?",              note:'For a woman: "Mi sono persa" (PAIR-sah).'},
 
   // TRANSPORT (12)
-  {id:43, cat:'transport', it:'Treno',        en:'Train',                 pron:'TRAY-no',             eg:'A che ora parte il treno?',               egEn:'What time does the train leave?'},
-  {id:44, cat:'transport', it:'Autobus',      en:'Bus',                   pron:'OW-toh-boos',         eg:"Dov'è la fermata dell'autobus?",          egEn:'Where is the bus stop?'},
-  {id:45, cat:'transport', it:'Taxi',         en:'Taxi',                  pron:'TAH-ksee',            eg:'Può chiamarmi un taxi?',                  egEn:'Can you call me a taxi?'},
-  {id:46, cat:'transport', it:'Aeroporto',    en:'Airport',               pron:'ah-ay-ro-POR-toh',    eg:"Come arrivo all'aeroporto?",              egEn:'How do I get to the airport?'},
-  {id:47, cat:'transport', it:'Biglietto',    en:'Ticket',                pron:'beel-YET-toh',        eg:'Un biglietto per Roma, per favore.',       egEn:'A ticket to Rome, please.'},
-  {id:48, cat:'transport', it:'Binario',      en:'Platform',              pron:'bee-NAH-ryoh',        eg:'Da quale binario parte il treno?',         egEn:'Which platform does the train leave from?'},
-  {id:49, cat:'transport', it:'Quando parte?',en:'When does it leave?',   pron:'KWAN-doh PAR-tay',   eg:'Quando parte il prossimo treno?',          egEn:'When does the next train leave?'},
-  {id:50, cat:'transport', it:'Fermata',      en:'Stop',                  pron:'fair-MAH-tah',        eg:'È la prossima fermata?',                   egEn:'Is this the next stop?'},
-  {id:51, cat:'transport', it:'Metro',        en:'Metro / Subway',        pron:'MET-roh',             eg:"Dov'è la stazione della metro?",           egEn:'Where is the metro station?'},
-  {id:52, cat:'transport', it:'Andata e ritorno',en:'Return ticket',      pron:'an-DAH-tah ay ree-TOR-no',eg:'Un biglietto andata e ritorno.',       egEn:'A return ticket.'},
-  {id:53, cat:'transport', it:'In ritardo',   en:'Delayed / Late',        pron:'in ree-TAR-doh',      eg:'Il treno è in ritardo di 20 minuti.',      egEn:'The train is 20 minutes late.'},
-  {id:54, cat:'transport', it:'Stazione',     en:'Station',               pron:'stat-SYOH-nay',       eg:"Dov'è la stazione centrale?",              egEn:'Where is the central station?'},
+  {id:43, cat:'transport', term:'Treno',        en:'Train',                 pron:'TRAY-no',             eg:'A che ora parte il treno?',               egEn:'What time does the train leave?'},
+  {id:44, cat:'transport', term:'Autobus',      en:'Bus',                   pron:'OW-toh-boos',         eg:"Dov'è la fermata dell'autobus?",          egEn:'Where is the bus stop?'},
+  {id:45, cat:'transport', term:'Taxi',         en:'Taxi',                  pron:'TAH-ksee',            eg:'Può chiamarmi un taxi?',                  egEn:'Can you call me a taxi?'},
+  {id:46, cat:'transport', term:'Aeroporto',    en:'Airport',               pron:'ah-ay-ro-POR-toh',    eg:"Come arrivo all'aeroporto?",              egEn:'How do I get to the airport?'},
+  {id:47, cat:'transport', term:'Biglietto',    en:'Ticket',                pron:'beel-YET-toh',        eg:'Un biglietto per Roma, per favore.',       egEn:'A ticket to Rome, please.'},
+  {id:48, cat:'transport', term:'Binario',      en:'Platform',              pron:'bee-NAH-ryoh',        eg:'Da quale binario parte il treno?',         egEn:'Which platform does the train leave from?'},
+  {id:49, cat:'transport', term:'Quando parte?',en:'When does it leave?',   pron:'KWAN-doh PAR-tay',   eg:'Quando parte il prossimo treno?',          egEn:'When does the next train leave?'},
+  {id:50, cat:'transport', term:'Fermata',      en:'Stop',                  pron:'fair-MAH-tah',        eg:'È la prossima fermata?',                   egEn:'Is this the next stop?'},
+  {id:51, cat:'transport', term:'Metro',        en:'Metro / Subway',        pron:'MET-roh',             eg:"Dov'è la stazione della metro?",           egEn:'Where is the metro station?'},
+  {id:52, cat:'transport', term:'Andata e ritorno',en:'Return ticket',      pron:'an-DAH-tah ay ree-TOR-no',eg:'Un biglietto andata e ritorno.',       egEn:'A return ticket.'},
+  {id:53, cat:'transport', term:'In ritardo',   en:'Delayed / Late',        pron:'in ree-TAR-doh',      eg:'Il treno è in ritardo di 20 minuti.',      egEn:'The train is 20 minutes late.'},
+  {id:54, cat:'transport', term:'Stazione',     en:'Station',               pron:'stat-SYOH-nay',       eg:"Dov'è la stazione centrale?",              egEn:'Where is the central station?'},
 
   // STAY (8)
-  {id:55, cat:'stay', it:'Camera',            en:'Room',                  pron:'KAH-meh-rah',         eg:'Ho prenotato una camera doppia.',          egEn:'I booked a double room.',                 note:'False friend — "camera" in Italian means room, not camera!'},
-  {id:56, cat:'stay', it:'Bagno',             en:'Bathroom',              pron:'BAH-nyo',             eg:"Dov'è il bagno?",                         egEn:'Where is the bathroom?'},
-  {id:57, cat:'stay', it:'Chiave',            en:'Key',                   pron:'KYAH-vay',            eg:'Posso avere la chiave della camera?',      egEn:'Can I have the room key?'},
-  {id:58, cat:'stay', it:'Colazione',         en:'Breakfast',             pron:'ko-lat-SYOH-nay',     eg:'La colazione è inclusa?',                  egEn:'Is breakfast included?'},
-  {id:59, cat:'stay', it:'Ascensore',         en:'Lift / Elevator',       pron:'ah-shen-SOH-ray',     eg:"Dov'è l'ascensore?",                      egEn:'Where is the lift?'},
-  {id:60, cat:'stay', it:'Piano',             en:'Floor',                 pron:'PYAH-no',             eg:'Sono al secondo piano.',                   egEn:"I'm on the second floor.",                note:'Also means "piano" (the instrument) and "slowly" — context tells you which!'},
-  {id:61, cat:'stay', it:'Wi-Fi',             en:'Wi-Fi password',        pron:'wee-FEE',             eg:'Qual è la password del Wi-Fi?',            egEn:"What's the Wi-Fi password?"},
-  {id:62, cat:'stay', it:'Check-out',         en:'Check out',             pron:'chek-owt',            eg:'A che ora è il check-out?',                egEn:'What time is check-out?'},
+  {id:55, cat:'stay', term:'Camera',            en:'Room',                  pron:'KAH-meh-rah',         eg:'Ho prenotato una camera doppia.',          egEn:'I booked a double room.',                 note:'False friend — "camera" in Italian means room, not camera!'},
+  {id:56, cat:'stay', term:'Bagno',             en:'Bathroom',              pron:'BAH-nyo',             eg:"Dov'è il bagno?",                         egEn:'Where is the bathroom?'},
+  {id:57, cat:'stay', term:'Chiave',            en:'Key',                   pron:'KYAH-vay',            eg:'Posso avere la chiave della camera?',      egEn:'Can I have the room key?'},
+  {id:58, cat:'stay', term:'Colazione',         en:'Breakfast',             pron:'ko-lat-SYOH-nay',     eg:'La colazione è inclusa?',                  egEn:'Is breakfast included?'},
+  {id:59, cat:'stay', term:'Ascensore',         en:'Lift / Elevator',       pron:'ah-shen-SOH-ray',     eg:"Dov'è l'ascensore?",                      egEn:'Where is the lift?'},
+  {id:60, cat:'stay', term:'Piano',             en:'Floor',                 pron:'PYAH-no',             eg:'Sono al secondo piano.',                   egEn:"I'm on the second floor.",                note:'Also means "piano" (the instrument) and "slowly" — context tells you which!'},
+  {id:61, cat:'stay', term:'Wi-Fi',             en:'Wi-Fi password',        pron:'wee-FEE',             eg:'Qual è la password del Wi-Fi?',            egEn:"What's the Wi-Fi password?"},
+  {id:62, cat:'stay', term:'Check-out',         en:'Check out',             pron:'chek-owt',            eg:'A che ora è il check-out?',                egEn:'What time is check-out?'},
 
   // SHOPPING (9)
-  {id:63, cat:'shop', it:'Caro',              en:'Expensive',             pron:'KAH-ro',              eg:'È troppo caro per me.',                    egEn:"It's too expensive for me."},
-  {id:64, cat:'shop', it:'Economico',         en:'Cheap / Affordable',    pron:'eh-ko-NOH-mee-ko',    eg:'Avete qualcosa di più economico?',         egEn:'Do you have something cheaper?'},
-  {id:65, cat:'shop', it:'Vorrei...',         en:'I would like...',       pron:'vor-RAY',             eg:'Vorrei questo, per favore.',               egEn:'I would like this, please.'},
-  {id:66, cat:'shop', it:'Contanti',          en:'Cash',                  pron:'kon-TAN-tee',         eg:'Pago in contanti.',                        egEn:"I'll pay in cash."},
-  {id:67, cat:'shop', it:'Carta',             en:'Card (payment)',        pron:'KAR-tah',             eg:'Accettate la carta?',                      egEn:'Do you accept card?',                     note:'Also means "paper", "map", or "menu" depending on context.'},
-  {id:68, cat:'shop', it:'Mercato',           en:'Market',                pron:'mair-KAH-toh',        eg:'A che ora apre il mercato?',               egEn:'What time does the market open?'},
-  {id:69, cat:'shop', it:'Aperto',            en:'Open',                  pron:'ah-PAIR-toh',         eg:'Il negozio è aperto?',                     egEn:'Is the shop open?'},
-  {id:70, cat:'shop', it:'Chiuso',            en:'Closed',                pron:'KYOO-zo',             eg:'Mi dispiace, siamo chiusi.',               egEn:"I'm sorry, we're closed."},
-  {id:71, cat:'shop', it:'Sconto',            en:'Discount',              pron:'SKON-toh',            eg:"C'è uno sconto?",                          egEn:'Is there a discount?'},
+  {id:63, cat:'shop', term:'Caro',              en:'Expensive',             pron:'KAH-ro',              eg:'È troppo caro per me.',                    egEn:"It's too expensive for me."},
+  {id:64, cat:'shop', term:'Economico',         en:'Cheap / Affordable',    pron:'eh-ko-NOH-mee-ko',    eg:'Avete qualcosa di più economico?',         egEn:'Do you have something cheaper?'},
+  {id:65, cat:'shop', term:'Vorrei...',         en:'I would like...',       pron:'vor-RAY',             eg:'Vorrei questo, per favore.',               egEn:'I would like this, please.'},
+  {id:66, cat:'shop', term:'Contanti',          en:'Cash',                  pron:'kon-TAN-tee',         eg:'Pago in contanti.',                        egEn:"I'll pay in cash."},
+  {id:67, cat:'shop', term:'Carta',             en:'Card (payment)',        pron:'KAR-tah',             eg:'Accettate la carta?',                      egEn:'Do you accept card?',                     note:'Also means "paper", "map", or "menu" depending on context.'},
+  {id:68, cat:'shop', term:'Mercato',           en:'Market',                pron:'mair-KAH-toh',        eg:'A che ora apre il mercato?',               egEn:'What time does the market open?'},
+  {id:69, cat:'shop', term:'Aperto',            en:'Open',                  pron:'ah-PAIR-toh',         eg:'Il negozio è aperto?',                     egEn:'Is the shop open?'},
+  {id:70, cat:'shop', term:'Chiuso',            en:'Closed',                pron:'KYOO-zo',             eg:'Mi dispiace, siamo chiusi.',               egEn:"I'm sorry, we're closed."},
+  {id:71, cat:'shop', term:'Sconto',            en:'Discount',              pron:'SKON-toh',            eg:"C'è uno sconto?",                          egEn:'Is there a discount?'},
 
   // EMERGENCY (7)
-  {id:72, cat:'emergency', it:'Aiuto!',       en:'Help!',                 pron:'ah-YOO-toh',          eg:'Aiuto! Ho bisogno di aiuto!',              egEn:'Help! I need help!'},
-  {id:73, cat:'emergency', it:'Dottore',      en:'Doctor',                pron:'dot-TOH-ray',         eg:'Ho bisogno di un dottore.',                egEn:'I need a doctor.'},
-  {id:74, cat:'emergency', it:'Polizia',      en:'Police',                pron:'po-LEET-syah',        eg:'Chiamate la polizia!',                     egEn:'Call the police!'},
-  {id:75, cat:'emergency', it:'Farmacia',     en:'Pharmacy',              pron:'far-mah-CHEE-ah',     eg:"Dov'è la farmacia più vicina?",            egEn:'Where is the nearest pharmacy?'},
-  {id:76, cat:'emergency', it:'Ospedale',     en:'Hospital',              pron:'os-peh-DAH-lay',      eg:"Mi porti all'ospedale, per favore.",       egEn:'Take me to the hospital, please.'},
-  {id:77, cat:'emergency', it:'Ambulanza',    en:'Ambulance',             pron:'am-boo-LAN-tsah',     eg:"Chiamate un'ambulanza!",                   egEn:'Call an ambulance!'},
-  {id:78, cat:'emergency', it:'Sto male',     en:"I don't feel well",     pron:'stoh MAH-lay',        eg:'Sto male. Ho bisogno di aiuto.',           egEn:"I don't feel well. I need help."},
+  {id:72, cat:'emergency', term:'Aiuto!',       en:'Help!',                 pron:'ah-YOO-toh',          eg:'Aiuto! Ho bisogno di aiuto!',              egEn:'Help! I need help!'},
+  {id:73, cat:'emergency', term:'Dottore',      en:'Doctor',                pron:'dot-TOH-ray',         eg:'Ho bisogno di un dottore.',                egEn:'I need a doctor.'},
+  {id:74, cat:'emergency', term:'Polizia',      en:'Police',                pron:'po-LEET-syah',        eg:'Chiamate la polizia!',                     egEn:'Call the police!'},
+  {id:75, cat:'emergency', term:'Farmacia',     en:'Pharmacy',              pron:'far-mah-CHEE-ah',     eg:"Dov'è la farmacia più vicina?",            egEn:'Where is the nearest pharmacy?'},
+  {id:76, cat:'emergency', term:'Ospedale',     en:'Hospital',              pron:'os-peh-DAH-lay',      eg:"Mi porti all'ospedale, per favore.",       egEn:'Take me to the hospital, please.'},
+  {id:77, cat:'emergency', term:'Ambulanza',    en:'Ambulance',             pron:'am-boo-LAN-tsah',     eg:"Chiamate un'ambulanza!",                   egEn:'Call an ambulance!'},
+  {id:78, cat:'emergency', term:'Sto male',     en:"I don't feel well",     pron:'stoh MAH-lay',        eg:'Sto male. Ho bisogno di aiuto.',           egEn:"I don't feel well. I need help."},
 
   // NUMBERS (12)
-  {id:79, cat:'numbers', it:'Uno',            en:'One (1)',               pron:'OO-no',               eg:'Un caffè, per favore.',                    egEn:'One coffee, please.'},
-  {id:80, cat:'numbers', it:'Due',            en:'Two (2)',               pron:'DOO-ay',              eg:'Un tavolo per due.',                       egEn:'A table for two.'},
-  {id:81, cat:'numbers', it:'Tre',            en:'Three (3)',             pron:'tray',                eg:'Tre biglietti, per favore.',               egEn:'Three tickets, please.'},
-  {id:82, cat:'numbers', it:'Quattro',        en:'Four (4)',              pron:'KWAT-tro',            eg:'Quattro persone.',                         egEn:'Four people.'},
-  {id:83, cat:'numbers', it:'Cinque',         en:'Five (5)',              pron:'CHEEN-kway',          eg:'Cinque euro.',                             egEn:'Five euros.'},
-  {id:84, cat:'numbers', it:'Sei',            en:'Six (6)',               pron:'say',                 eg:'Sei ore.',                                 egEn:'Six hours.'},
-  {id:85, cat:'numbers', it:'Sette',          en:'Seven (7)',             pron:'SET-tay',             eg:'Sette giorni.',                            egEn:'Seven days.'},
-  {id:86, cat:'numbers', it:'Otto',           en:'Eight (8)',             pron:'OT-toh',              eg:'Otto persone.',                            egEn:'Eight people.'},
-  {id:87, cat:'numbers', it:'Nove',           en:'Nine (9)',              pron:'NOH-vay',             eg:'Nove euro.',                               egEn:'Nine euros.'},
-  {id:88, cat:'numbers', it:'Dieci',          en:'Ten (10)',              pron:'DYEH-chee',           eg:'Dieci minuti.',                            egEn:'Ten minutes.'},
-  {id:89, cat:'numbers', it:'Venti',          en:'Twenty (20)',           pron:'VEN-tee',             eg:'Venti euro.',                              egEn:'Twenty euros.'},
-  {id:90, cat:'numbers', it:'Cento',          en:'One hundred (100)',     pron:'CHEN-toh',            eg:'Cento euro.',                              egEn:'One hundred euros.'},
+  {id:79, cat:'numbers', term:'Uno',            en:'One (1)',               pron:'OO-no',               eg:'Un caffè, per favore.',                    egEn:'One coffee, please.'},
+  {id:80, cat:'numbers', term:'Due',            en:'Two (2)',               pron:'DOO-ay',              eg:'Un tavolo per due.',                       egEn:'A table for two.'},
+  {id:81, cat:'numbers', term:'Tre',            en:'Three (3)',             pron:'tray',                eg:'Tre biglietti, per favore.',               egEn:'Three tickets, please.'},
+  {id:82, cat:'numbers', term:'Quattro',        en:'Four (4)',              pron:'KWAT-tro',            eg:'Quattro persone.',                         egEn:'Four people.'},
+  {id:83, cat:'numbers', term:'Cinque',         en:'Five (5)',              pron:'CHEEN-kway',          eg:'Cinque euro.',                             egEn:'Five euros.'},
+  {id:84, cat:'numbers', term:'Sei',            en:'Six (6)',               pron:'say',                 eg:'Sei ore.',                                 egEn:'Six hours.'},
+  {id:85, cat:'numbers', term:'Sette',          en:'Seven (7)',             pron:'SET-tay',             eg:'Sette giorni.',                            egEn:'Seven days.'},
+  {id:86, cat:'numbers', term:'Otto',           en:'Eight (8)',             pron:'OT-toh',              eg:'Otto persone.',                            egEn:'Eight people.'},
+  {id:87, cat:'numbers', term:'Nove',           en:'Nine (9)',              pron:'NOH-vay',             eg:'Nove euro.',                               egEn:'Nine euros.'},
+  {id:88, cat:'numbers', term:'Dieci',          en:'Ten (10)',              pron:'DYEH-chee',           eg:'Dieci minuti.',                            egEn:'Ten minutes.'},
+  {id:89, cat:'numbers', term:'Venti',          en:'Twenty (20)',           pron:'VEN-tee',             eg:'Venti euro.',                              egEn:'Twenty euros.'},
+  {id:90, cat:'numbers', term:'Cento',          en:'One hundred (100)',     pron:'CHEN-toh',            eg:'Cento euro.',                              egEn:'One hundred euros.'},
 
   // TIME (9)
-  {id:91, cat:'time', it:'Oggi',              en:'Today',                 pron:'OJ-jee',              eg:'Oggi fa caldo.',                           egEn:"It's hot today."},
-  {id:92, cat:'time', it:'Domani',            en:'Tomorrow',              pron:'doh-MAH-nee',         eg:'Ci vediamo domani.',                       egEn:'See you tomorrow.'},
-  {id:93, cat:'time', it:'Ieri',              en:'Yesterday',             pron:'YEH-ree',             eg:'Ieri siamo stati a Roma.',                 egEn:'Yesterday we were in Rome.'},
-  {id:94, cat:'time', it:'Mattina',           en:'Morning',               pron:'mat-TEE-nah',         eg:'Di mattina bevo il caffè.',                egEn:'In the morning I drink coffee.'},
-  {id:95, cat:'time', it:'Pomeriggio',        en:'Afternoon',             pron:'poh-meh-REE-joh',     eg:'Nel pomeriggio andiamo al museo.',         egEn:'In the afternoon we go to the museum.'},
-  {id:96, cat:'time', it:'Sera',              en:'Evening',               pron:'SAY-rah',             eg:'Buona sera!',                              egEn:'Good evening!'},
-  {id:97, cat:'time', it:'Adesso',            en:'Now',                   pron:'ah-DES-so',           eg:'Partiamo adesso.',                         egEn:"Let's leave now."},
-  {id:98, cat:'time', it:'Dopo',              en:'Later',                 pron:'DOH-po',              eg:'Ci vediamo dopo.',                         egEn:'See you later.'},
-  {id:99, cat:'time', it:'Che ore sono?',     en:'What time is it?',      pron:'kay OH-ray SOH-no',   eg:'Scusa, che ore sono?',                     egEn:'Excuse me, what time is it?'},
+  {id:91, cat:'time', term:'Oggi',              en:'Today',                 pron:'OJ-jee',              eg:'Oggi fa caldo.',                           egEn:"It's hot today."},
+  {id:92, cat:'time', term:'Domani',            en:'Tomorrow',              pron:'doh-MAH-nee',         eg:'Ci vediamo domani.',                       egEn:'See you tomorrow.'},
+  {id:93, cat:'time', term:'Ieri',              en:'Yesterday',             pron:'YEH-ree',             eg:'Ieri siamo stati a Roma.',                 egEn:'Yesterday we were in Rome.'},
+  {id:94, cat:'time', term:'Mattina',           en:'Morning',               pron:'mat-TEE-nah',         eg:'Di mattina bevo il caffè.',                egEn:'In the morning I drink coffee.'},
+  {id:95, cat:'time', term:'Pomeriggio',        en:'Afternoon',             pron:'poh-meh-REE-joh',     eg:'Nel pomeriggio andiamo al museo.',         egEn:'In the afternoon we go to the museum.'},
+  {id:96, cat:'time', term:'Sera',              en:'Evening',               pron:'SAY-rah',             eg:'Buona sera!',                              egEn:'Good evening!'},
+  {id:97, cat:'time', term:'Adesso',            en:'Now',                   pron:'ah-DES-so',           eg:'Partiamo adesso.',                         egEn:"Let's leave now."},
+  {id:98, cat:'time', term:'Dopo',              en:'Later',                 pron:'DOH-po',              eg:'Ci vediamo dopo.',                         egEn:'See you later.'},
+  {id:99, cat:'time', term:'Che ore sono?',     en:'What time is it?',      pron:'kay OH-ray SOH-no',   eg:'Scusa, che ore sono?',                     egEn:'Excuse me, what time is it?'},
 ];
+
+WORDS_BY_LANG.de = [
+{id:0, cat:'basics', term:'Hallo', en:'Hello / Bye', pron:'HAH-loh', eg:'Hallo! Wie geht\'s dir?', egEn:"Hi! How are you?", note:'In Austria and Bavaria, "Servus" is a common casual alternative for both hello and goodbye.'},
+{id:1, cat:'basics', term:'Guten Morgen', en:'Good morning', pron:'GOO-ten MOR-gen', eg:'Guten Morgen! Hast du gut geschlafen?', egEn:'Good morning! Did you sleep well?'},
+{id:2, cat:'basics', term:'Guten Abend', en:'Good evening', pron:'GOO-ten AH-bent', eg:'Guten Abend! Hast du einen Tisch für uns?', egEn:'Good evening! Do you have a table for us?'},
+{id:3, cat:'basics', term:'Bitte', en:'Please', pron:'BIT-teh', eg:'Ein Wasser, bitte.', egEn:'A water, please.', note:'"Bitte" also means "you\'re welcome" and "pardon?" — context decides which.'},
+{id:4, cat:'basics', term:'Danke', en:'Thank you', pron:'DAHN-keh', eg:'Danke schön!', egEn:'Thank you very much!'},
+{id:5, cat:'basics', term:'Bitte schön', en:"You're welcome", pron:'BIT-teh shurn', eg:'"Danke!" "Bitte schön!"', egEn:'"Thanks!" "You\'re welcome!"'},
+{id:6, cat:'basics', term:'Entschuldigung', en:'Excuse me / Sorry', pron:'ent-SHUL-dee-gung', eg:'Entschuldigung, wo ist die Toilette?', egEn:"Excuse me, where's the toilet?"},
+{id:7, cat:'basics', term:'Es tut mir leid', en:"I'm sorry", pron:'es toot meer lyte', eg:'Es tut mir leid, das wusste ich nicht.', egEn:"I'm sorry, I didn't know that."},
+{id:8, cat:'basics', term:'Ja', en:'Yes', pron:'yah', eg:'Ja, gerne!', egEn:'Yes, gladly!'},
+{id:9, cat:'basics', term:'Nein', en:'No', pron:'nine', eg:'Nein, danke.', egEn:'No, thank you.'},
+{id:10, cat:'basics', term:'Ich verstehe nicht', en:"I don't understand", pron:'ish fer-SHTAY-eh nisht', eg:'Entschuldigung, ich verstehe nicht.', egEn:"Sorry, I don't understand."},
+{id:11, cat:'basics', term:'Sprichst du Englisch?', en:'Do you speak English?', pron:'shprikhst doo ENG-lish', eg:'Sprichst du Englisch? Mein Deutsch ist nicht so gut.', egEn:"Do you speak English? My German isn't very good."},
+{id:12, cat:'basics', term:'Wie viel kostet das?', en:'How much is it?', pron:'vee feel KOS-tet dahs', eg:'Wie viel kostet das, bitte?', egEn:'How much does this cost, please?'},
+{id:13, cat:'basics', term:'Wo ist...?', en:'Where is...?', pron:'voh ist', eg:'Wo ist der Bahnhof?', egEn:'Where is the train station?'},
+{id:14, cat:'basics', term:'Das reicht', en:"That's enough / Stop", pron:'dahs ryesht', eg:'Das reicht, danke!', egEn:"That's enough, thank you!"},
+{id:15, cat:'food', term:'Wasser', en:'Water', pron:'VAH-ser', eg:'Ein Wasser ohne Kohlensäure, bitte.', egEn:'A still water, please.'},
+{id:16, cat:'food', term:'Wein', en:'Wine', pron:'vine', eg:'Ein Glas Rotwein, bitte.', egEn:'A glass of red wine, please.'},
+{id:17, cat:'food', term:'Bier', en:'Beer', pron:'beer', eg:'Ein Bier vom Fass, bitte.', egEn:'A draft beer, please.'},
+{id:18, cat:'food', term:'Kaffee', en:'Coffee', pron:'KAH-fay', eg:'Kann ich einen Kaffee bekommen?', egEn:'Can I get a coffee?'},
+{id:19, cat:'food', term:'Brot', en:'Bread', pron:'broht', eg:'Können wir noch etwas Brot haben?', egEn:'Can we have some more bread?'},
+{id:20, cat:'food', term:'Die Rechnung', en:'The bill', pron:'dee REKH-nung', eg:'Die Rechnung, bitte!', egEn:'The bill, please!'},
+{id:21, cat:'food', term:'Ein Tisch', en:'A table', pron:'ine tish', eg:'Ein Tisch für zwei, bitte.', egEn:'A table for two, please.'},
+{id:22, cat:'food', term:'Speisekarte', en:'Menu', pron:'SHPY-zeh-kar-teh', eg:'Können wir die Speisekarte haben?', egEn:'Can we have the menu?'},
+{id:23, cat:'food', term:'Vegetarisch', en:'Vegetarian', pron:'veh-geh-TAH-rish', eg:'Habt ihr vegetarische Gerichte?', egEn:'Do you have vegetarian dishes?'},
+{id:24, cat:'food', term:'Glutenfrei', en:'Gluten free', pron:'gloo-TEN-fry', eg:'Ist das glutenfrei?', egEn:'Is this gluten free?'},
+{id:25, cat:'food', term:'Allergie', en:'Allergy', pron:'ah-lair-GEE', eg:'Ich habe eine Nussallergie.', egEn:'I have a nut allergy.'},
+{id:26, cat:'food', term:'Lecker', en:'Delicious', pron:'LEK-er', eg:'Das schmeckt total lecker!', egEn:'This tastes really delicious!'},
+{id:27, cat:'food', term:'Kellner', en:'Waiter', pron:'KELL-ner', eg:'Entschuldigung, Kellner! Die Rechnung, bitte.', egEn:'Excuse me, waiter! The bill, please.', note:'Male form. For a waitress say "Kellnerin" (KELL-ner-in).'},
+{id:28, cat:'food', term:'Vorspeise', en:'Starter', pron:'FOR-shpy-zeh', eg:'Als Vorspeise nehme ich die Suppe.', egEn:"I'll have the soup as a starter."},
+{id:29, cat:'food', term:'Nachtisch', en:'Dessert / Sweet', pron:'NAHKH-tish', eg:'Was gibt es zum Nachtisch?', egEn:'What is there for dessert?'},
+{id:30, cat:'food', term:'Reservierung', en:'Reservation', pron:'reh-zer-VEER-ung', eg:'Ich habe eine Reservierung für 20 Uhr.', egEn:'I have a reservation for 8pm.'},
+{id:31, cat:'directions', term:'Links', en:'To the left', pron:'links', eg:'Geh links an der Ampel.', egEn:'Go left at the traffic light.'},
+{id:32, cat:'directions', term:'Rechts', en:'To the right', pron:'rekhts', eg:'Der Bahnhof ist rechts.', egEn:'The station is on the right.'},
+{id:33, cat:'directions', term:'Geradeaus', en:'Straight ahead', pron:'geh-RAH-deh-ows', eg:'Geh einfach geradeaus.', egEn:'Just go straight ahead.'},
+{id:34, cat:'directions', term:'Abbiegen', en:'Turn', pron:'AHB-bee-gen', eg:'An der nächsten Kreuzung abbiegen.', egEn:'Turn at the next intersection.'},
+{id:35, cat:'directions', term:'Hier', en:'Here', pron:'heer', eg:'Halt hier, bitte.', egEn:'Stop here, please.'},
+{id:36, cat:'directions', term:'Dort', en:'There', pron:'dort', eg:'Das Restaurant ist dort drüben.', egEn:'The restaurant is over there.'},
+{id:37, cat:'directions', term:'Weit', en:'Far away', pron:'vyte', eg:'Ist es weit von hier?', egEn:'Is it far from here?'},
+{id:38, cat:'directions', term:'Nah', en:'Near / Close', pron:'nah', eg:'Es ist ganz nah am Bahnhof.', egEn:"It's very close to the station."},
+{id:39, cat:'directions', term:'Straße', en:'Street / Road', pron:'SHTRAH-seh', eg:'Wie heißt diese Straße?', egEn:'What is this street called?'},
+{id:40, cat:'directions', term:'Platz', en:'Square / Plaza', pron:'plahts', eg:'Wir treffen uns am Platz.', egEn:"Let's meet at the square."},
+{id:41, cat:'directions', term:'Stadtzentrum', en:'City centre', pron:'SHTAHT-tsen-troom', eg:'Wie komme ich ins Stadtzentrum?', egEn:'How do I get to the city centre?'},
+{id:42, cat:'directions', term:'Ich habe mich verlaufen', en:"I'm lost", pron:'ish HAH-beh mish fer-LOW-fen', eg:'Ich habe mich verlaufen. Kannst du mir helfen?', egEn:"I'm lost. Can you help me?"},
+{id:43, cat:'transport', term:'Zug', en:'Train', pron:'tsoog', eg:'Wann fährt der Zug ab?', egEn:'When does the train leave?'},
+{id:44, cat:'transport', term:'Bus', en:'Bus', pron:'boos', eg:'Wo ist die Bushaltestelle?', egEn:'Where is the bus stop?'},
+{id:45, cat:'transport', term:'Taxi', en:'Taxi', pron:'TAHK-see', eg:'Kannst du mir ein Taxi rufen?', egEn:'Can you call me a taxi?'},
+{id:46, cat:'transport', term:'Flughafen', en:'Airport', pron:'FLOOG-hah-fen', eg:'Wie komme ich zum Flughafen?', egEn:'How do I get to the airport?'},
+{id:47, cat:'transport', term:'Fahrkarte', en:'Ticket', pron:'FAHR-kar-teh', eg:'Eine Fahrkarte nach Berlin, bitte.', egEn:'A ticket to Berlin, please.'},
+{id:48, cat:'transport', term:'Gleis', en:'Platform', pron:'glice', eg:'Von welchem Gleis fährt der Zug ab?', egEn:'Which platform does the train leave from?'},
+{id:49, cat:'transport', term:'Wann fährt es ab?', en:'When does it leave?', pron:'vahn fairt es ahb', eg:'Wann fährt der nächste Zug ab?', egEn:'When does the next train leave?'},
+{id:50, cat:'transport', term:'Haltestelle', en:'Stop', pron:'HAHL-teh-shtel-leh', eg:'Ist das die nächste Haltestelle?', egEn:'Is this the next stop?'},
+{id:51, cat:'transport', term:'U-Bahn', en:'Metro / Subway', pron:'OO-bahn', eg:'Wo ist die nächste U-Bahn-Station?', egEn:'Where is the nearest metro station?'},
+{id:52, cat:'transport', term:'Hin- und Rückfahrkarte', en:'Return ticket', pron:'hin oont RUEK-fahr-kar-teh', eg:'Eine Hin- und Rückfahrkarte, bitte.', egEn:'A return ticket, please.'},
+{id:53, cat:'transport', term:'Verspätet', en:'Delayed / Late', pron:'fer-SHPAY-tet', eg:'Der Zug ist 20 Minuten verspätet.', egEn:'The train is 20 minutes delayed.'},
+{id:54, cat:'transport', term:'Bahnhof', en:'Station', pron:'BAHN-hohf', eg:'Wo ist der Hauptbahnhof?', egEn:'Where is the main station?', note:'Compound word: "Bahn" (railway) + "Hof" (yard/court). "Hauptbahnhof" means main/central station.'},
+{id:55, cat:'stay', term:'Zimmer', en:'Room', pron:'TSIM-mer', eg:'Ich habe ein Doppelzimmer gebucht.', egEn:'I booked a double room.'},
+{id:56, cat:'stay', term:'Badezimmer', en:'Bathroom', pron:'BAH-deh-tsim-mer', eg:'Wo ist das Badezimmer?', egEn:'Where is the bathroom?'},
+{id:57, cat:'stay', term:'Schlüssel', en:'Key', pron:'SHLUES-sel', eg:'Kann ich den Zimmerschlüssel haben?', egEn:'Can I have the room key?'},
+{id:58, cat:'stay', term:'Frühstück', en:'Breakfast', pron:'FRUE-shtuek', eg:'Ist das Frühstück inklusive?', egEn:'Is breakfast included?'},
+{id:59, cat:'stay', term:'Aufzug', en:'Lift / Elevator', pron:'OWF-tsoog', eg:'Wo ist der Aufzug?', egEn:'Where is the lift?', note:'In Austria, "Lift" is more commonly used than "Aufzug".'},
+{id:60, cat:'stay', term:'Stockwerk', en:'Floor', pron:'SHTOK-vairk', eg:'Mein Zimmer ist im zweiten Stockwerk.', egEn:'My room is on the second floor.'},
+{id:61, cat:'stay', term:'WLAN-Passwort', en:'Wi-Fi password', pron:'VEH-lahn pahs-vort', eg:'Wie ist das WLAN-Passwort?', egEn:"What's the Wi-Fi password?", note:'Germans say "WLAN" (VEH-lahn), not "Wi-Fi", though both are understood.'},
+{id:62, cat:'stay', term:'Check-out', en:'Check out', pron:'CHEK-owt', eg:'Wann ist der Check-out?', egEn:'When is check-out?'},
+{id:63, cat:'shop', term:'Teuer', en:'Expensive', pron:'TOY-er', eg:'Das ist mir zu teuer.', egEn:"That's too expensive for me."},
+{id:64, cat:'shop', term:'Günstig', en:'Cheap / Affordable', pron:'GUEN-stig', eg:'Habt ihr etwas Günstigeres?', egEn:'Do you have something cheaper?'},
+{id:65, cat:'shop', term:'Ich möchte...', en:'I would like...', pron:'ish MUKH-teh', eg:'Ich möchte das hier, bitte.', egEn:'I would like this, please.'},
+{id:66, cat:'shop', term:'Bargeld', en:'Cash', pron:'BAR-gelt', eg:'Ich zahle mit Bargeld.', egEn:"I'll pay with cash."},
+{id:67, cat:'shop', term:'Karte', en:'Card (payment)', pron:'KAR-teh', eg:'Kann ich mit Karte zahlen?', egEn:'Can I pay by card?', note:'"Karte" also means "map" or "menu" — context tells you which.'},
+{id:68, cat:'shop', term:'Markt', en:'Market', pron:'markt', eg:'Wann öffnet der Markt?', egEn:'When does the market open?'},
+{id:69, cat:'shop', term:'Geöffnet', en:'Open', pron:'geh-EUF-net', eg:'Ist der Laden geöffnet?', egEn:'Is the shop open?'},
+{id:70, cat:'shop', term:'Geschlossen', en:'Closed', pron:'geh-SHLOSS-en', eg:'Es tut mir leid, wir haben geschlossen.', egEn:"I'm sorry, we're closed."},
+{id:71, cat:'shop', term:'Rabatt', en:'Discount', pron:'rah-BAHT', eg:'Gibt es einen Rabatt?', egEn:'Is there a discount?'},
+{id:72, cat:'emergency', term:'Hilfe!', en:'Help!', pron:'HIL-feh', eg:'Hilfe! Ich brauche Hilfe!', egEn:'Help! I need help!'},
+{id:73, cat:'emergency', term:'Arzt', en:'Doctor', pron:'artst', eg:'Ich brauche einen Arzt.', egEn:'I need a doctor.', note:'Male form. For a female doctor say "Ärztin" (AIRTS-tin).'},
+{id:74, cat:'emergency', term:'Polizei', en:'Police', pron:'po-lee-TSY', eg:'Ruf die Polizei!', egEn:'Call the police!'},
+{id:75, cat:'emergency', term:'Apotheke', en:'Pharmacy', pron:'ah-po-TAY-keh', eg:'Wo ist die nächste Apotheke?', egEn:'Where is the nearest pharmacy?', note:'False friend: "Apotheke" is a pharmacy, not an "apothecary" shop selling herbs and oddities.'},
+{id:76, cat:'emergency', term:'Krankenhaus', en:'Hospital', pron:'KRAHN-ken-hows', eg:'Bring mich bitte ins Krankenhaus.', egEn:'Please take me to the hospital.'},
+{id:77, cat:'emergency', term:'Krankenwagen', en:'Ambulance', pron:'KRAHN-ken-vah-gen', eg:'Ruf einen Krankenwagen!', egEn:'Call an ambulance!'},
+{id:78, cat:'emergency', term:'Mir ist schlecht', en:"I don't feel well", pron:'meer ist shlekht', eg:'Mir ist schlecht. Ich brauche Hilfe.', egEn:"I don't feel well. I need help."},
+{id:79, cat:'numbers', term:'Eins', en:'One (1)', pron:'eyens', eg:'Einen Kaffee, bitte.', egEn:'One coffee, please.'},
+{id:80, cat:'numbers', term:'Zwei', en:'Two (2)', pron:'tsvy', eg:'Ein Tisch für zwei.', egEn:'A table for two.'},
+{id:81, cat:'numbers', term:'Drei', en:'Three (3)', pron:'dry', eg:'Drei Fahrkarten, bitte.', egEn:'Three tickets, please.'},
+{id:82, cat:'numbers', term:'Vier', en:'Four (4)', pron:'feer', eg:'Vier Personen.', egEn:'Four people.'},
+{id:83, cat:'numbers', term:'Fünf', en:'Five (5)', pron:'fuenf', eg:'Fünf Euro.', egEn:'Five euros.'},
+{id:84, cat:'numbers', term:'Sechs', en:'Six (6)', pron:'zeks', eg:'Sechs Stunden.', egEn:'Six hours.'},
+{id:85, cat:'numbers', term:'Sieben', en:'Seven (7)', pron:'ZEE-ben', eg:'Sieben Tage.', egEn:'Seven days.'},
+{id:86, cat:'numbers', term:'Acht', en:'Eight (8)', pron:'ahkht', eg:'Acht Personen.', egEn:'Eight people.'},
+{id:87, cat:'numbers', term:'Neun', en:'Nine (9)', pron:'noyn', eg:'Neun Euro.', egEn:'Nine euros.'},
+{id:88, cat:'numbers', term:'Zehn', en:'Ten (10)', pron:'tsayn', eg:'Zehn Minuten.', egEn:'Ten minutes.'},
+{id:89, cat:'numbers', term:'Zwanzig', en:'Twenty (20)', pron:'TSVAHN-tsig', eg:'Zwanzig Euro.', egEn:'Twenty euros.'},
+{id:90, cat:'numbers', term:'Hundert', en:'One hundred (100)', pron:'HOON-dert', eg:'Hundert Euro.', egEn:'One hundred euros.'},
+{id:91, cat:'time', term:'Heute', en:'Today', pron:'HOY-teh', eg:'Heute ist es warm.', egEn:"It's warm today."},
+{id:92, cat:'time', term:'Morgen', en:'Tomorrow', pron:'MOR-gen', eg:'Wir sehen uns morgen.', egEn:'See you tomorrow.', note:'"Morgen" means both "tomorrow" and "morning" — capital "Morgen" as a noun is morning, but the word is identical.'},
+{id:93, cat:'time', term:'Gestern', en:'Yesterday', pron:'GES-tern', eg:'Gestern waren wir in München.', egEn:'Yesterday we were in Munich.'},
+{id:94, cat:'time', term:'Morgens', en:'Morning', pron:'MOR-gens', eg:'Morgens trinke ich Kaffee.', egEn:'In the morning I drink coffee.'},
+{id:95, cat:'time', term:'Nachmittag', en:'Afternoon', pron:'NAHKH-mit-tahg', eg:'Am Nachmittag gehen wir ins Museum.', egEn:'In the afternoon we go to the museum.'},
+{id:96, cat:'time', term:'Abend', en:'Evening', pron:'AH-bent', eg:'Guten Abend!', egEn:'Good evening!'},
+{id:97, cat:'time', term:'Jetzt', en:'Now', pron:'yetst', eg:'Lass uns jetzt losfahren.', egEn:"Let's leave now."},
+{id:98, cat:'time', term:'Später', en:'Later', pron:'SHPAY-ter', eg:'Wir sehen uns später.', egEn:'See you later.'},
+{id:99, cat:'time', term:'Wie viel Uhr ist es?', en:'What time is it?', pron:'vee feel oor ist es', eg:'Entschuldigung, wie viel Uhr ist es?', egEn:'Excuse me, what time is it?'},
+];
+
+WORDS_BY_LANG.nl = [
+{id:0, cat:'basics', term:'Hallo', en:'Hello', pron:'HAH-loh', eg:'Hallo! Hoe gaat het met je?', egEn:"Hi! How are you?"},
+{id:1, cat:'basics', term:'Goedemorgen', en:'Good morning', pron:'KHOO-deh-MOR-khen', eg:'Goedemorgen! Heb je goed geslapen?', egEn:'Good morning! Did you sleep well?'},
+{id:2, cat:'basics', term:'Goedenavond', en:'Good evening', pron:'KHOO-den-AH-vont', eg:'Goedenavond! Hebben jullie een tafel voor ons?', egEn:'Good evening! Do you have a table for us?'},
+{id:3, cat:'basics', term:'Alsjeblieft', en:'Please / Here you go', pron:'ALS-yeh-bleeft', eg:'Een water, alsjeblieft.', egEn:'A water, please.', note:'Also said when handing something over, like "here you go." The formal version is "alstublieft" (ALS-too-bleeft), used with "u".'},
+{id:4, cat:'basics', term:'Dank je wel', en:'Thank you', pron:'dahnk yeh vel', eg:'Dank je wel voor je hulp!', egEn:'Thank you very much for your help!', note:'Use "dank u wel" (dahnk oo vel) when speaking formally to strangers or elders.'},
+{id:5, cat:'basics', term:'Graag gedaan', en:"You're welcome", pron:'khrahkh kheh-DAHN', eg:'"Dank je wel!" "Graag gedaan!"', egEn:'"Thanks!" "You\'re welcome!"'},
+{id:6, cat:'basics', term:'Sorry', en:'Excuse me / Sorry', pron:'SOR-ree', eg:'Sorry, waar is het toilet?', egEn:"Excuse me, where's the toilet?"},
+{id:7, cat:'basics', term:'Het spijt me', en:"I'm sorry", pron:'het speyt meh', eg:'Het spijt me, dat wist ik niet.', egEn:"I'm sorry, I didn't know that."},
+{id:8, cat:'basics', term:'Ja', en:'Yes', pron:'yah', eg:'Ja, graag!', egEn:'Yes, please!'},
+{id:9, cat:'basics', term:'Nee', en:'No', pron:'nay', eg:'Nee, dank je.', egEn:'No, thank you.'},
+{id:10, cat:'basics', term:'Ik begrijp het niet', en:"I don't understand", pron:'ik beh-GREYP het neet', eg:'Sorry, ik begrijp het niet.', egEn:"Sorry, I don't understand."},
+{id:11, cat:'basics', term:'Spreek je Engels?', en:'Do you speak English?', pron:'sprayk yeh ENG-els', eg:'Spreek je Engels? Mijn Nederlands is niet zo goed.', egEn:"Do you speak English? My Dutch isn't very good.", note:'Almost all Dutch people speak excellent English, but asking first is still polite.'},
+{id:12, cat:'basics', term:'Hoeveel kost dit?', en:'How much does this cost?', pron:'hoo-VAYL kost dit', eg:'Hoeveel kost dit, alstublieft?', egEn:'How much does this cost, please?'},
+{id:13, cat:'basics', term:'Waar is...?', en:'Where is...?', pron:'vahr is', eg:'Waar is het station?', egEn:'Where is the train station?'},
+{id:14, cat:'basics', term:'Doei', en:'Bye', pron:'doy', eg:'Doei! Tot morgen!', egEn:'Bye! See you tomorrow!', note:'Very casual. "Tot ziens" is a safer, more neutral goodbye with strangers.'},
+{id:15, cat:'food', term:'Water', en:'Water', pron:'VAH-ter', eg:'Een water zonder prik, alsjeblieft.', egEn:'A still water, please.', note:'"Water met prik" is sparkling, "zonder prik" is still — tap water is rarely offered free in restaurants.'},
+{id:16, cat:'food', term:'Wijn', en:'Wine', pron:'vine', eg:'Een glas rode wijn, alsjeblieft.', egEn:'A glass of red wine, please.'},
+{id:17, cat:'food', term:'Bier', en:'Beer', pron:'beer', eg:'Een biertje van de tap, alsjeblieft.', egEn:'A draft beer, please.'},
+{id:18, cat:'food', term:'Koffie', en:'Coffee', pron:'KOF-fee', eg:'Mag ik een koffie?', egEn:'Can I get a coffee?'},
+{id:19, cat:'food', term:'Brood', en:'Bread', pron:'broht', eg:'Kunnen we nog wat brood krijgen?', egEn:'Can we have some more bread?'},
+{id:20, cat:'food', term:'De rekening', en:'The bill', pron:'deh REH-keh-ning', eg:'De rekening, graag!', egEn:'The bill, please!'},
+{id:21, cat:'food', term:'Een tafel', en:'A table', pron:'en TAH-fel', eg:'Een tafel voor twee, alsjeblieft.', egEn:'A table for two, please.'},
+{id:22, cat:'food', term:'Menukaart', en:'Menu', pron:'meh-NEW-kahrt', eg:'Mogen we de menukaart?', egEn:'Can we have the menu?'},
+{id:23, cat:'food', term:'Vegetarisch', en:'Vegetarian', pron:'vay-geh-TAH-rees', eg:'Hebben jullie vegetarische gerechten?', egEn:'Do you have vegetarian dishes?'},
+{id:24, cat:'food', term:'Glutenvrij', en:'Gluten free', pron:'KHLOO-ten-vry', eg:'Is dit glutenvrij?', egEn:'Is this gluten free?'},
+{id:25, cat:'food', term:'Allergie', en:'Allergy', pron:'ah-ler-GHEE', eg:'Ik heb een notenallergie.', egEn:'I have a nut allergy.'},
+{id:26, cat:'food', term:'Lekker', en:'Delicious / Nice', pron:'LEK-ker', eg:'Dit smaakt echt lekker!', egEn:'This tastes really delicious!'},
+{id:27, cat:'food', term:'Ober', en:'Waiter', pron:'OH-ber', eg:'Sorry, ober! De rekening, graag.', egEn:'Excuse me, waiter! The bill, please.'},
+{id:28, cat:'food', term:'Toetje', en:'Dessert', pron:'TOO-cheh', eg:'Wat is er voor toetje?', egEn:'What is there for dessert?'},
+{id:29, cat:'food', term:'Patat', en:'Fries', pron:'pah-TAHT', eg:'Een patatje met mayonaise, alsjeblieft.', egEn:'A portion of fries with mayonnaise, please.'},
+{id:30, cat:'directions', term:'Links', en:'To the left', pron:'links', eg:'Ga links bij het stoplicht.', egEn:'Go left at the traffic light.'},
+{id:31, cat:'directions', term:'Rechts', en:'To the right', pron:'rekhts', eg:'Het station is rechts.', egEn:'The station is on the right.'},
+{id:32, cat:'directions', term:'Rechtdoor', en:'Straight ahead', pron:'rekht-DOHR', eg:'Ga gewoon rechtdoor.', egEn:'Just go straight ahead.'},
+{id:33, cat:'directions', term:'Hier', en:'Here', pron:'heer', eg:'Stop hier, alsjeblieft.', egEn:'Stop here, please.'},
+{id:34, cat:'directions', term:'Daar', en:'There', pron:'dahr', eg:'Het restaurant is daar.', egEn:'The restaurant is over there.'},
+{id:35, cat:'directions', term:'Ver', en:'Far away', pron:'ver', eg:'Is het ver van hier?', egEn:'Is it far from here?'},
+{id:36, cat:'directions', term:'Dichtbij', en:'Near / Close', pron:'dikht-BAY', eg:'Het is heel dichtbij het station.', egEn:"It's very close to the station."},
+{id:37, cat:'directions', term:'Straat', en:'Street', pron:'straht', eg:'Hoe heet deze straat?', egEn:'What is this street called?'},
+{id:38, cat:'directions', term:'Centrum', en:'City centre', pron:'SEN-trum', eg:'Hoe kom ik naar het centrum?', egEn:'How do I get to the city centre?'},
+{id:39, cat:'directions', term:'Ik ben verdwaald', en:"I'm lost", pron:'ik ben ver-DVAHLD', eg:'Ik ben verdwaald. Kun je me helpen?', egEn:"I'm lost. Can you help me?"},
+{id:40, cat:'transport', term:'Trein', en:'Train', pron:'trine', eg:'Hoe laat vertrekt de trein?', egEn:'What time does the train leave?'},
+{id:41, cat:'transport', term:'Bus', en:'Bus', pron:'bus', eg:'Waar is de bushalte?', egEn:'Where is the bus stop?'},
+{id:42, cat:'transport', term:'Fiets', en:'Bicycle', pron:'feets', eg:'Waar kan ik een fiets huren?', egEn:'Where can I rent a bicycle?'},
+{id:43, cat:'transport', term:'Tram', en:'Tram', pron:'trem', eg:'Welke tram gaat naar het museum?', egEn:'Which tram goes to the museum?'},
+{id:44, cat:'transport', term:'Taxi', en:'Taxi', pron:'TAHK-see', eg:'Kun je een taxi voor me bellen?', egEn:'Can you call me a taxi?'},
+{id:45, cat:'transport', term:'Kaartje', en:'Ticket', pron:'KAHRT-yeh', eg:'Een kaartje naar Amsterdam, alsjeblieft.', egEn:'A ticket to Amsterdam, please.'},
+{id:46, cat:'transport', term:'Spoor', en:'Platform / Track', pron:'spohr', eg:'Van welk spoor vertrekt de trein?', egEn:'Which platform does the train leave from?'},
+{id:47, cat:'transport', term:'Halte', en:'Stop', pron:'HAHL-teh', eg:'Is dit de volgende halte?', egEn:'Is this the next stop?'},
+{id:48, cat:'transport', term:'OV-chipkaart', en:'Public transport card', pron:'oh-VAY-chip-kahrt', eg:'Je hebt een OV-chipkaart nodig voor de tram.', egEn:'You need an OV-chipkaart for the tram.', note:'The reusable card used to check in/out on Dutch trains, trams, buses and metros nationwide.'},
+{id:49, cat:'transport', term:'Fietspad', en:'Bike path', pron:'FEETS-paht', eg:'Loop niet op het fietspad!', egEn:"Don't walk on the bike path!", note:'Important: stepping into a bike lane in the Netherlands can genuinely get you hit — fietspaden are taken seriously.'},
+{id:50, cat:'stay', term:'Kamer', en:'Room', pron:'KAH-mer', eg:'Ik heb een tweepersoonskamer geboekt.', egEn:'I booked a double room.'},
+{id:51, cat:'stay', term:'Badkamer', en:'Bathroom', pron:'BAHT-kah-mer', eg:'Waar is de badkamer?', egEn:'Where is the bathroom?'},
+{id:52, cat:'stay', term:'Sleutel', en:'Key', pron:'SLOY-tel', eg:'Mag ik de kamersleutel?', egEn:'Can I have the room key?'},
+{id:53, cat:'stay', term:'Ontbijt', en:'Breakfast', pron:'ont-BAYT', eg:'Is het ontbijt inbegrepen?', egEn:'Is breakfast included?'},
+{id:54, cat:'stay', term:'Lift', en:'Lift / Elevator', pron:'lift', eg:'Waar is de lift?', egEn:'Where is the lift?'},
+{id:55, cat:'stay', term:'Verdieping', en:'Floor', pron:'ver-DEE-ping', eg:'Mijn kamer is op de tweede verdieping.', egEn:'My room is on the second floor.'},
+{id:56, cat:'stay', term:'Wifi-wachtwoord', en:'Wi-Fi password', pron:'WEE-fee VAKHT-vohrt', eg:'Wat is het wifi-wachtwoord?', egEn:"What's the Wi-Fi password?"},
+{id:57, cat:'stay', term:'Uitchecken', en:'Check out', pron:'OYT-chek-en', eg:'Hoe laat moet ik uitchecken?', egEn:'What time do I have to check out?'},
+{id:58, cat:'stay', term:'Inchecken', en:'Check in', pron:'IN-chek-en', eg:'Vanaf hoe laat kunnen we inchecken?', egEn:'From what time can we check in?'},
+{id:59, cat:'stay', term:'Hostel', en:'Hostel', pron:'HOS-tel', eg:'Is er een hostel in de buurt?', egEn:'Is there a hostel nearby?'},
+{id:60, cat:'shop', term:'Duur', en:'Expensive', pron:'dewr', eg:'Dat is te duur voor mij.', egEn:"That's too expensive for me."},
+{id:61, cat:'shop', term:'Goedkoop', en:'Cheap', pron:'khoot-KOHP', eg:'Hebben jullie iets goedkopers?', egEn:'Do you have something cheaper?'},
+{id:62, cat:'shop', term:'Ik wil graag...', en:'I would like...', pron:'ik vil khrahkh', eg:'Ik wil dit graag, alsjeblieft.', egEn:'I would like this, please.'},
+{id:63, cat:'shop', term:'Contant geld', en:'Cash', pron:'kon-TANT khelt', eg:'Ik betaal met contant geld.', egEn:"I'll pay with cash.", note:'Many small shops and even some restaurants in the Netherlands are card-only — don\'t assume cash is accepted.'},
+{id:64, cat:'shop', term:'Pinnen', en:'To pay by card', pron:'PIN-nen', eg:'Kan ik hier pinnen?', egEn:'Can I pay by card here?', note:'"Pinnen" specifically means paying with a debit/bank card — the most common payment method in the Netherlands.'},
+{id:65, cat:'shop', term:'Markt', en:'Market', pron:'markt', eg:'Hoe laat gaat de markt open?', egEn:'When does the market open?'},
+{id:66, cat:'shop', term:'Open', en:'Open', pron:'OH-pen', eg:'Is de winkel open?', egEn:'Is the shop open?'},
+{id:67, cat:'shop', term:'Gesloten', en:'Closed', pron:'kheh-SLOH-ten', eg:'Sorry, we zijn gesloten.', egEn:"I'm sorry, we're closed."},
+{id:68, cat:'shop', term:'Korting', en:'Discount', pron:'KOR-ting', eg:'Is er korting?', egEn:'Is there a discount?'},
+{id:69, cat:'shop', term:'Bonnetje', en:'Receipt', pron:'BON-neh-cheh', eg:'Mag ik een bonnetje, alsjeblieft?', egEn:'Can I have a receipt, please?'},
+{id:70, cat:'emergency', term:'Help!', en:'Help!', pron:'help', eg:'Help! Ik heb hulp nodig!', egEn:'Help! I need help!'},
+{id:71, cat:'emergency', term:'Dokter', en:'Doctor', pron:'DOK-ter', eg:'Ik heb een dokter nodig.', egEn:'I need a doctor.'},
+{id:72, cat:'emergency', term:'Politie', en:'Police', pron:'poh-LEET-see', eg:'Bel de politie!', egEn:'Call the police!'},
+{id:73, cat:'emergency', term:'Apotheek', en:'Pharmacy', pron:'ah-poh-TAYK', eg:'Waar is de dichtstbijzijnde apotheek?', egEn:'Where is the nearest pharmacy?', note:'False friend: "apotheek" is a pharmacy/chemist, not an "apothecary" curiosity shop.'},
+{id:74, cat:'emergency', term:'Ziekenhuis', en:'Hospital', pron:'ZEE-ken-hoys', eg:'Breng me naar het ziekenhuis, alsjeblieft.', egEn:'Please take me to the hospital.'},
+{id:75, cat:'emergency', term:'Ambulance', en:'Ambulance', pron:'am-bew-LAHN-seh', eg:'Bel een ambulance!', egEn:'Call an ambulance!'},
+{id:76, cat:'emergency', term:'Ik voel me niet goed', en:"I don't feel well", pron:'ik vool meh neet khoot', eg:'Ik voel me niet goed. Ik heb hulp nodig.', egEn:"I don't feel well. I need help."},
+{id:77, cat:'emergency', term:'Alarmnummer', en:'Emergency number', pron:'ah-LARM-num-mer', eg:'Het alarmnummer in Nederland is 112.', egEn:'The emergency number in the Netherlands is 112.', note:'112 works for police, ambulance and fire — same as the EU-wide emergency number.'},
+{id:78, cat:'emergency', term:'Brand', en:'Fire', pron:'brahnt', eg:'Brand! Bel de brandweer!', egEn:'Fire! Call the fire brigade!', note:'False friend warning: "brand" in Dutch means fire, not the English word "brand".'},
+{id:79, cat:'emergency', term:'Ik heb mijn paspoort verloren', en:"I've lost my passport", pron:'ik hep mayn PAS-pohrt ver-LOH-ren', eg:'Help, ik heb mijn paspoort verloren!', egEn:"Help, I've lost my passport!"},
+{id:80, cat:'numbers', term:'Een', en:'One (1)', pron:'ayn', eg:'Een koffie, alsjeblieft.', egEn:'One coffee, please.'},
+{id:81, cat:'numbers', term:'Twee', en:'Two (2)', pron:'tvay', eg:'Een tafel voor twee.', egEn:'A table for two.'},
+{id:82, cat:'numbers', term:'Drie', en:'Three (3)', pron:'dree', eg:'Drie kaartjes, alsjeblieft.', egEn:'Three tickets, please.'},
+{id:83, cat:'numbers', term:'Vier', en:'Four (4)', pron:'veer', eg:'Vier personen.', egEn:'Four people.'},
+{id:84, cat:'numbers', term:'Vijf', en:'Five (5)', pron:'fayf', eg:'Vijf euro.', egEn:'Five euros.'},
+{id:85, cat:'numbers', term:'Zes', en:'Six (6)', pron:'zes', eg:'Zes personen, alstublieft.', egEn:'Six people, please.'},
+{id:86, cat:'numbers', term:'Zeven', en:'Seven (7)', pron:'ZAY-ven', eg:'Zeven dagen.', egEn:'Seven days.'},
+{id:87, cat:'numbers', term:'Tien', en:'Ten (10)', pron:'teen', eg:'Tien minuten.', egEn:'Ten minutes.'},
+{id:88, cat:'numbers', term:'Twintig', en:'Twenty (20)', pron:'TVIN-tikh', eg:'Twintig euro.', egEn:'Twenty euros.'},
+{id:89, cat:'numbers', term:'Honderd', en:'One hundred (100)', pron:'HON-dert', eg:'Honderd euro.', egEn:'One hundred euros.'},
+{id:90, cat:'time', term:'Vandaag', en:'Today', pron:'van-DAHKH', eg:'Vandaag is het warm.', egEn:"It's warm today."},
+{id:91, cat:'time', term:'Morgen', en:'Tomorrow', pron:'MOR-khen', eg:'We zien elkaar morgen.', egEn:'See you tomorrow.', note:'"Morgen" means both "tomorrow" and "morning" — same as in German, context tells you which.'},
+{id:92, cat:'time', term:'Gisteren', en:'Yesterday', pron:'KHIS-teh-ren', eg:'Gisteren waren we in Amsterdam.', egEn:'Yesterday we were in Amsterdam.'},
+{id:93, cat:'time', term:'Ochtend', en:'Morning', pron:'OKH-tent', eg:'In de ochtend drink ik koffie.', egEn:'In the morning I drink coffee.'},
+{id:94, cat:'time', term:'Middag', en:'Afternoon', pron:'MID-dahkh', eg:'Vanmiddag gaan we naar het museum.', egEn:'This afternoon we are going to the museum.'},
+{id:95, cat:'time', term:'Avond', en:'Evening', pron:'AH-vont', eg:'Goedenavond!', egEn:'Good evening!'},
+{id:96, cat:'time', term:'Nu', en:'Now', pron:'new', eg:'Laten we nu vertrekken.', egEn:"Let's leave now."},
+{id:97, cat:'time', term:'Later', en:'Later', pron:'LAH-ter', eg:'Tot later!', egEn:'See you later!'},
+{id:98, cat:'time', term:'Hoe laat is het?', en:'What time is it?', pron:'hoo laht is het', eg:'Sorry, hoe laat is het?', egEn:'Excuse me, what time is it?'},
+{id:99, cat:'time', term:'Wanneer?', en:'When?', pron:'vah-NAYR', eg:'Wanneer vertrekt de volgende bus?', egEn:'When does the next bus leave?'},
+];
+
+var currentLang = 'it';
+var WORDS = WORDS_BY_LANG[currentLang];
 
 /* ═══════════════════════════════════════════════════════════
    STATE — localStorage
 ═══════════════════════════════════════════════════════════ */
-var SK  = 'lk_it';
-var STK = 'lk_itst';
 var NEW_LIMIT = 10;
+var LK = 'lk_lang';
+var STK = 'lk_streak';
 
-function loadState(){ try{ return JSON.parse(localStorage.getItem(SK)||'{}'); }catch(e){ return {}; } }
-function saveState(s){ localStorage.setItem(SK, JSON.stringify(s)); }
+function stateKey(lang){ return 'lk_state_' + (lang||currentLang); }
+
+function migrateLegacyData(){
+  if(localStorage.getItem('lk_it') && !localStorage.getItem(stateKey('it'))){
+    localStorage.setItem(stateKey('it'), localStorage.getItem('lk_it'));
+  }
+  if(localStorage.getItem('lk_itst') && !localStorage.getItem(STK)){
+    localStorage.setItem(STK, localStorage.getItem('lk_itst'));
+  }
+}
+
+function loadLang(){ return localStorage.getItem(LK) || 'it'; }
+function saveLang(lang){ localStorage.setItem(LK, lang); }
+
+function loadState(){ try{ return JSON.parse(localStorage.getItem(stateKey())||'{}'); }catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(stateKey(), JSON.stringify(s)); }
 function loadStreak(){ try{ return JSON.parse(localStorage.getItem(STK)||'{"days":0,"last":""}'); }catch(e){ return {days:0,last:''}; } }
 function saveStreak(s){ localStorage.setItem(STK, JSON.stringify(s)); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -896,7 +1146,30 @@ function exitStudy(){
 /* ═══════════════════════════════════════════════════════════
    HOME RENDER
 ═══════════════════════════════════════════════════════════ */
+function switchLang(lang){
+  if(lang === currentLang) return;
+  currentLang = lang;
+  saveLang(lang);
+  WORDS = WORDS_BY_LANG[currentLang];
+  renderHome();
+}
+
+function renderLangRow(){
+  var html='';
+  Object.keys(LANGS).forEach(function(code){
+    var l=LANGS[code];
+    html+='<div class="lang-pill'+(code===currentLang?' active':'')+'" onclick="switchLang(\''+code+'\')">'
+      +'<span>'+l.flag+'</span><span>'+l.name+'</span></div>';
+  });
+  document.getElementById('langRow').innerHTML = html;
+}
+
 function renderHome(){
+  var lang = LANGS[currentLang];
+  document.getElementById('homeEyebrow').textContent = lang.eyebrow;
+  document.getElementById('homeTitle').innerHTML = lang.flag + ' <span>' + lang.name + '</span>';
+  renderLangRow();
+
   var now=Date.now(), state=loadState(), streak=loadStreak();
   var learned=0, due=0, newCount=0;
   WORDS.forEach(function(w){
@@ -1059,7 +1332,7 @@ function showChoiceCard(card, speedMode){
   options.forEach(function(opt, i){
     var sp = speedMode ? ',true' : ',false';
     html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+sp+')">'
-      + esc(opt.it) + '</button>';
+      + esc(opt.term) + '</button>';
   });
   document.getElementById('choiceGrid').innerHTML = html;
 }
@@ -1075,7 +1348,7 @@ function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
 
   if(!isCorrect){
     btns.forEach(function(b){
-      if(b.textContent.trim() === card.it) b.classList.add('reveal');
+      if(b.textContent.trim() === card.term) b.classList.add('reveal');
     });
   }
 
@@ -1137,7 +1410,7 @@ function showGapCard(card){
 
 function buildGapSentence(card){
   var sentence = card.eg;
-  var word     = card.it.replace(/[.?!…]+$/, '').trim();
+  var word     = card.term.replace(/[.?!…]+$/, '').trim();
   var re = new RegExp(escapeRe(word), 'i');
   if(re.test(sentence)) return sentence.replace(re, '<b>____</b>');
   var parts = word.split(/\s+/).filter(function(w){ return w.length > 3; });
@@ -1173,7 +1446,7 @@ function submitTyped(){
   var typed = field.value.trim();
   if(!typed) return;
 
-  var isMatch = normalise(typed) === normalise(card.it);
+  var isMatch = normalise(typed) === normalise(card.term);
 
   field.className = 'type-field ' + (isMatch ? 'correct' : 'wrong');
   field.disabled  = true;
@@ -1182,7 +1455,7 @@ function submitTyped(){
   var revealWord = document.getElementById('inputRevealWord');
   var revealNote = document.getElementById('inputRevealNote');
   var revealEg   = document.getElementById('inputRevealEg');
-  revealWord.textContent = card.it;
+  revealWord.textContent = card.term;
   revealWord.className   = 'input-reveal-word' + (isMatch ? '' : ' miss');
   revealNote.textContent = isMatch ? 'Correct! ✓' : 'You typed: "' + typed + '"';
 
@@ -1319,6 +1592,9 @@ function esc(s){
 /* ═══════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════ */
+migrateLegacyData();
+currentLang = loadLang();
+WORDS = WORDS_BY_LANG[currentLang];
 renderHome();
 </script>
 </body>
