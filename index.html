@@ -297,6 +297,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .type-field:focus{border-color:var(--ac)}
 .type-field.correct{border-color:var(--ok);background:var(--ok-dim);color:var(--ok)}
+.type-field.almost{border-color:var(--warn);background:var(--warn-dim);color:var(--warn)}
 .type-field.wrong{border-color:var(--err);background:var(--err-dim);color:var(--err)}
 .submit-btn{
   width:100%;height:54px;
@@ -313,9 +314,20 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   background:var(--s1);border:1px solid var(--bd);
 }
 .input-reveal.show{display:block}
-.input-reveal-word{font-size:22px;font-weight:900;color:var(--ok);margin-bottom:3px}
+.input-reveal-word{font-size:22px;font-weight:900;color:var(--ok);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:8px}
 .input-reveal-word.miss{color:var(--err)}
+.input-reveal-word.almost{color:var(--warn)}
 .input-reveal-note{font-size:12px;color:var(--tx2)}
+.speak-btn{
+  font-size:16px;line-height:1;padding:2px;opacity:.85;
+  -webkit-user-select:none;user-select:none;
+}
+.speak-btn:active{transform:scale(.85);opacity:.6}
+.speak-link{
+  display:inline-block;margin-top:4px;font-size:13px;font-weight:700;
+  color:var(--ac-tx);-webkit-user-select:none;user-select:none;
+}
+.speak-link:active{opacity:.6}
 
 /* ── Choice panel (4-Choice + Speed) ─────────────────── */
 .choice-panel{
@@ -552,6 +564,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
       <div class="prog-fill" id="progFill" style="width:0%"></div>
     </div>
     <div class="prog-lbl" id="progLbl">0 / 0</div>
+    <button class="back-btn" id="audioToggle" onclick="toggleAudio()">🔊</button>
   </div>
 
   <div class="study-subhdr">
@@ -614,7 +627,10 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
            onkeydown="if(event.key==='Enter' && !this.disabled)submitTyped()"/>
     <button class="submit-btn" id="submitBtn" onclick="submitTyped()">Check →</button>
     <div class="input-reveal" id="inputReveal">
-      <div class="input-reveal-word" id="inputRevealWord">—</div>
+      <div class="input-reveal-word" id="inputRevealWord">
+        <span id="inputRevealWordText">—</span>
+        <span class="speak-btn" onclick="replayAudio()">🔊</span>
+      </div>
       <div class="input-reveal-note" id="inputRevealNote">—</div>
       <div class="input-reveal-eg" id="inputRevealEg"></div>
     </div>
@@ -625,6 +641,9 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
     <div class="choice-mode-lbl" id="choiceModeLbl">What is this in Italian?</div>
     <div class="choice-prompt" id="choicePrompt">—</div>
     <div class="choice-grid" id="choiceGrid"></div>
+    <div class="choice-replay" id="choiceReplay" style="display:none;text-align:center">
+      <span class="speak-link" onclick="replayAudio()">🔊 Hear it again</span>
+    </div>
   </div>
 
   <!-- Continue button (shown after wrong answer) -->
@@ -673,9 +692,9 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 ═══════════════════════════════════════════════════════════ */
 
 var LANGS = {
-  it: { name:'Italiano',   flag:'🇮🇹', eyebrow:'Italy survival kit' },
-  de: { name:'Deutsch',    flag:'🇩🇪', eyebrow:'Germany & Austria survival kit' },
-  nl: { name:'Nederlands', flag:'🇳🇱', eyebrow:'Netherlands survival kit' },
+  it: { name:'Italiano',   flag:'🇮🇹', eyebrow:'Italy survival kit',             tts:'it-IT' },
+  de: { name:'Deutsch',    flag:'🇩🇪', eyebrow:'Germany & Austria survival kit', tts:'de-DE' },
+  nl: { name:'Nederlands', flag:'🇳🇱', eyebrow:'Netherlands survival kit',       tts:'nl-NL' },
 };
 
 var CATS = {
@@ -1305,9 +1324,9 @@ function updateSessionBadge(type){
 }
 
 /* ─── Correct ────────────────────────────────────────────── */
-function onCorrect(card){
+function onCorrect(card, quality){
   var state = loadState();
-  state[card.id] = sm2(state[card.id] || {}, 5);
+  state[card.id] = sm2(state[card.id] || {}, quality || 5);
   saveState(state);
 
   sess.queue.shift();
@@ -1356,8 +1375,9 @@ function continueSession(){
 function showChoiceCard(card, speedMode){
   var panel = document.getElementById('choicePanel');
   panel.style.display = 'flex';
-  document.getElementById('choiceModeLbl').textContent = speedMode ? '⚡ What is this in Italian?' : 'What is this in Italian?';
+  document.getElementById('choiceModeLbl').textContent = (speedMode?'⚡ ':'') + 'What is this in ' + LANGS[currentLang].name + '?';
   document.getElementById('choicePrompt').textContent  = card.en;
+  document.getElementById('choiceReplay').style.display = 'none';
 
   var pool = WORDS.filter(function(w){ return w.id !== card.id; });
   shuffle(pool);
@@ -1388,6 +1408,9 @@ function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
     });
   }
 
+  speak(card.term);
+  if(!speedMode) document.getElementById('choiceReplay').style.display = 'block';
+
   if(speedMode){
     speedTotal++;
     if(isCorrect) speedCorrect++;
@@ -1412,7 +1435,7 @@ function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
 ═══════════════════════════════════════════════════════════ */
 function showTypeCard(card){
   document.getElementById('inputPanel').style.display  = 'flex';
-  document.getElementById('inputModeLbl').textContent  = 'Translate to Italian';
+  document.getElementById('inputModeLbl').textContent  = 'Translate to ' + LANGS[currentLang].name;
   document.getElementById('inputPrompt').textContent   = card.en;
   document.getElementById('gapSentence').style.display = 'none';
   document.getElementById('gapHint').style.display     = 'none';
@@ -1464,6 +1487,7 @@ function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function resetInputPanel(){
   var field = document.getElementById('typeField');
   field.value = ''; field.className = 'type-field'; field.disabled = false;
+  field.placeholder = 'type ' + LANGS[currentLang].name + ' here…';
   document.getElementById('submitBtn').disabled = false;
   document.getElementById('inputReveal').classList.remove('show');
   document.getElementById('continueWrap').style.display = 'none';
@@ -1482,18 +1506,23 @@ function submitTyped(){
   var typed = field.value.trim();
   if(!typed) return;
 
-  var isMatch = normalise(typed) === normalise(card.term);
+  var typedNorm   = normalise(typed);
+  var correctNorm = normalise(card.term);
+  var dist        = levenshtein(typedNorm, correctNorm);
+  var isExact     = dist === 0;
+  var isAlmost    = !isExact && dist <= typoThreshold(correctNorm);
+  var isMatch     = isExact || isAlmost;
 
-  field.className = 'type-field ' + (isMatch ? 'correct' : 'wrong');
+  field.className = 'type-field ' + (isExact ? 'correct' : isAlmost ? 'almost' : 'wrong');
   field.disabled  = true;
   document.getElementById('submitBtn').disabled = true;
 
   var revealWord = document.getElementById('inputRevealWord');
   var revealNote = document.getElementById('inputRevealNote');
   var revealEg   = document.getElementById('inputRevealEg');
-  revealWord.textContent = card.term;
-  revealWord.className   = 'input-reveal-word' + (isMatch ? '' : ' miss');
-  revealNote.textContent = isMatch ? 'Correct! ✓' : 'You typed: "' + typed + '"';
+  document.getElementById('inputRevealWordText').textContent = card.term;
+  revealWord.className   = 'input-reveal-word' + (isExact ? '' : isAlmost ? ' almost' : ' miss');
+  revealNote.textContent = isExact ? 'Correct! ✓' : isAlmost ? 'Almost! Tiny typo — counted as correct ✓' : 'You typed: "' + typed + '"';
 
   if(item.type === 'type' && card.eg){
     revealEg.textContent = card.eg + (card.egEn ? ' — ' + card.egEn : '');
@@ -1505,8 +1534,9 @@ function submitTyped(){
   }
 
   document.getElementById('inputReveal').classList.add('show');
+  speak(card.term);
 
-  if(isMatch) onCorrect(card);
+  if(isMatch) onCorrect(card, isAlmost ? 4 : 5);
   else        onWrong(card);
 }
 
@@ -1514,7 +1544,57 @@ function normalise(s){
   return s.toLowerCase().trim()
     .replace(/[àá]/g,'a').replace(/[èé]/g,'e').replace(/[ìí]/g,'i')
     .replace(/[òó]/g,'o').replace(/[ùú]/g,'u')
+    .replace(/[äå]/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss')
     .replace(/[.?!…]+$/, '');
+}
+
+function levenshtein(a, b){
+  var m=a.length, n=b.length;
+  if(m===0) return n;
+  if(n===0) return m;
+  var prev=[], cur=[];
+  for(var j=0; j<=n; j++) prev[j]=j;
+  for(var i=1; i<=m; i++){
+    cur[0]=i;
+    for(j=1; j<=n; j++){
+      cur[j] = a[i-1]===b[j-1] ? prev[j-1] : 1+Math.min(prev[j-1], prev[j], cur[j-1]);
+    }
+    prev=cur; cur=[];
+  }
+  return prev[n];
+}
+
+function typoThreshold(word){
+  if(word.length <= 3) return 0;
+  if(word.length <= 7) return 1;
+  return 2;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TEXT-TO-SPEECH
+═══════════════════════════════════════════════════════════ */
+var AK = 'lk_audio';
+var audioOn = (localStorage.getItem(AK) !== 'off');
+var lastSpoken = '';
+
+function speak(text){
+  if(!text || !audioOn || typeof window === 'undefined' || !window.speechSynthesis) return;
+  lastSpoken = text;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = (LANGS[currentLang] && LANGS[currentLang].tts) || 'it-IT';
+  u.rate = 0.88;
+  window.speechSynthesis.speak(u);
+}
+
+function replayAudio(){ speak(lastSpoken); }
+
+function toggleAudio(){
+  audioOn = !audioOn;
+  localStorage.setItem(AK, audioOn ? 'on' : 'off');
+  var btn = document.getElementById('audioToggle');
+  if(btn) btn.textContent = audioOn ? '🔊' : '🔇';
+  if(!audioOn && typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1530,7 +1610,7 @@ function startSpeed(){
   document.getElementById('inputPanel').style.display  = 'none';
   document.getElementById('choicePanel').style.display = 'flex';
   document.getElementById('continueWrap').style.display= 'none';
-  document.getElementById('choiceModeLbl').textContent = '⚡ What is this in Italian?';
+  document.getElementById('choiceModeLbl').textContent = '⚡ What is this in ' + LANGS[currentLang].name + '?';
   document.getElementById('timerWrap').classList.add('show');
   document.getElementById('progFill').style.width = '0%';
   document.getElementById('progLbl').textContent  = '0%';
@@ -1631,6 +1711,7 @@ function esc(s){
 migrateLegacyData();
 currentLang = loadLang();
 WORDS = WORDS_BY_LANG[currentLang];
+document.getElementById('audioToggle').textContent = audioOn ? '🔊' : '🔇';
 renderHome();
 </script>
 </body>
