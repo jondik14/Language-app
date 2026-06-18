@@ -4,25 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Italiano">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#ffffff">
 <title>Italiano · Flashcards</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{background:#0d0d0d;height:100%;-webkit-text-size-adjust:100%}
+html{background:#fff;height:100%;-webkit-text-size-adjust:100%}
 ::-webkit-scrollbar{display:none}
 *{scrollbar-width:none;-webkit-tap-highlight-color:transparent}
 
 :root{
-  --bg:#0d0d0d; --s1:#181818; --s2:#222; --s3:#2d2d2d;
-  --tx:#f0ede8; --tx2:#888; --tx3:#484848;
-  --bd:rgba(255,255,255,.07); --bd2:rgba(255,255,255,.13);
-  --ac:#F26419; --ac-dim:rgba(242,100,25,.13); --ac-tx:#F58A50;
-  --ok:#4ade80; --ok-dim:rgba(74,222,128,.12);
-  --warn:#fbbf24; --warn-dim:rgba(251,191,36,.12);
-  --err:#f87171; --err-dim:rgba(248,113,113,.12);
+  --bg:#ffffff; --s1:#ffffff; --s2:#f7f7f7; --s3:#e5e5e5;
+  --tx:#3c3c3c; --tx2:#777777; --tx3:#afafaf;
+  --bd:#e5e5e5; --bd2:#e5e5e5;
+  --ac:#58CC02; --ac-dim:rgba(88,204,2,.12); --ac-tx:#58A700;
+  --ok:#58CC02; --ok-dim:rgba(88,204,2,.12);
+  --warn:#FFC800; --warn-dim:rgba(255,200,0,.15);
+  --err:#FF4B4B; --err-dim:rgba(255,75,75,.1);
+  --blue:#1CB0F6; --blue-dim:#DDF4FF; --blue-tx:#1899D6;
   --font:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
   --spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.4%,.938 16%,1.017,1.06,1.076 22.3%,1.07 24%,1.013 27.3%,.992 29.2%,.977 31.5%,.975 33%,.984 36.8%,1.001 40%,1.006 43.3%,1 50%);
 }
@@ -104,7 +105,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   -webkit-user-select:none;user-select:none;
 }
 .cat-card:active{transform:scale(.93);background:var(--s2)}
-.cat-card.has-due{border-color:rgba(242,100,25,.35);background:rgba(242,100,25,.07)}
+.cat-card.has-due{border-color:rgba(88,204,2,.35);background:rgba(88,204,2,.07)}
 .cat-em{font-size:28px;line-height:1}
 .cat-name{font-size:11px;font-weight:700;color:var(--tx);line-height:1.3}
 .cat-prog{font-size:10px;color:var(--tx3);font-weight:600}
@@ -147,7 +148,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .mode-card:active{transform:scale(.93);background:var(--s2)}
 .mode-card.full{grid-column:1/-1;flex-direction:row;align-items:center;gap:16px}
-.mode-card.ac-card{background:var(--ac-dim);border-color:rgba(242,100,25,.3)}
+.mode-card.ac-card{background:var(--ac-dim);border-color:rgba(88,204,2,.3)}
 .mode-card.warn-card{background:var(--warn-dim);border-color:rgba(251,191,36,.3)}
 .mode-em{font-size:30px;line-height:1}
 .mode-name{font-size:13px;font-weight:800;color:var(--tx);letter-spacing:-.01em}
@@ -159,7 +160,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 .badge-ok{background:var(--ok-dim);color:var(--ok);border:1px solid rgba(74,222,128,.2)}
 .badge-err{background:var(--err-dim);color:var(--err);border:1px solid rgba(248,113,113,.2)}
 .badge-warn{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(251,191,36,.2)}
-.badge-ac{background:var(--ac-dim);color:var(--ac-tx);border:1px solid rgba(242,100,25,.2)}
+.badge-ac{background:var(--ac-dim);color:var(--ac-tx);border:1px solid rgba(88,204,2,.2)}
 .mode-card.full .mode-em{flex-shrink:0}
 .mode-card.full .mode-name{font-size:15px}
 .mode-badge.ml-auto{margin-left:auto}
@@ -222,7 +223,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   position:absolute;top:16px;left:16px;
   font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   padding:4px 11px;border-radius:999px;
-  background:var(--ac-dim);color:var(--ac);border:1px solid rgba(242,100,25,.22);
+  background:var(--ac-dim);color:var(--ac);border:1px solid rgba(88,204,2,.22);
 }
 .card-new-badge{
   position:absolute;top:16px;right:16px;
@@ -354,10 +355,81 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   -webkit-user-select:none;user-select:none;line-height:1.3;
 }
 .choice-btn:active:not(:disabled){transform:scale(.97)}
+.choice-btn.selected{background:var(--blue-dim);border-color:var(--blue);color:var(--blue-tx)}
 .choice-btn.correct{background:var(--ok-dim);border-color:rgba(74,222,128,.4);color:var(--ok)}
 .choice-btn.wrong{background:var(--err-dim);border-color:rgba(248,113,113,.4);color:var(--err)}
 .choice-btn.reveal{background:var(--ok-dim);border-color:rgba(74,222,128,.4);color:var(--ok)}
 .choice-btn:disabled{opacity:.6;pointer-events:none}
+.choice-check-btn{margin-top:2px}
+.choice-listen-icon{
+  width:84px;height:84px;margin:4px auto 0;
+  background:var(--blue);color:#fff;
+  border-radius:22px;
+  display:none;align-items:center;justify-content:center;
+  font-size:34px;
+  -webkit-user-select:none;user-select:none;
+  transition:transform .2s var(--spring);
+}
+.choice-listen-icon:active{transform:scale(.93)}
+.choice-listen-skip{
+  display:none;text-align:center;margin-top:-2px;
+  font-size:12px;font-weight:700;color:var(--tx3);
+  -webkit-user-select:none;user-select:none;
+}
+.choice-listen-skip:active{opacity:.6}
+
+/* ── Match panel (Tap the matching pairs) ─────────────── */
+.match-panel{
+  display:none;flex:1;flex-direction:column;
+  justify-content:center;gap:14px;
+  padding:0 20px;
+}
+.match-grid{display:flex;gap:10px}
+.match-col{flex:1;display:flex;flex-direction:column;gap:9px}
+.match-pill{
+  width:100%;padding:13px 14px;
+  background:var(--s1);border:1.5px solid var(--bd2);
+  border-radius:999px;
+  font-size:13px;font-weight:700;color:var(--tx);text-align:center;
+  transition:transform .2s var(--spring),background .15s,border-color .15s;
+  -webkit-user-select:none;user-select:none;line-height:1.3;
+}
+.match-pill:active:not(:disabled){transform:scale(.95)}
+.match-pill.selected{background:var(--blue-dim);border-color:var(--blue);color:var(--blue-tx)}
+.match-pill.matched{background:var(--ok-dim);border-color:rgba(74,222,128,.4);color:var(--ok);opacity:.7}
+.match-pill.wrong{background:var(--err-dim);border-color:rgba(248,113,113,.4);color:var(--err)}
+.match-pill:disabled{pointer-events:none}
+
+/* ── Speak panel (Repeat after) ───────────────────────── */
+.speak-panel{
+  display:none;flex:1;flex-direction:column;
+  justify-content:center;align-items:center;gap:14px;
+  padding:0 20px;
+}
+.speak-mascot{font-size:60px;line-height:1}
+.speak-bubble{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:16px;padding:14px 18px;
+  display:flex;align-items:center;gap:10px;
+  font-size:16px;font-weight:700;color:var(--tx);text-align:center;
+  max-width:100%;
+}
+.speak-bubble-icon{font-size:18px;-webkit-user-select:none;user-select:none}
+.speak-bubble-icon:active{opacity:.6}
+.speak-mic-btn{
+  width:76px;height:76px;border-radius:50%;
+  background:var(--blue);color:#fff;font-size:30px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s var(--spring),background .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.speak-mic-btn:active{transform:scale(.92)}
+.speak-mic-btn.listening{background:var(--err);animation:speakPulse 1s infinite}
+@keyframes speakPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.speak-status{font-size:13px;font-weight:700;color:var(--tx2);min-height:18px;text-align:center}
+.speak-status.correct{color:var(--ok)}
+.speak-status.almost{color:var(--warn)}
+.speak-status.wrong{color:var(--err)}
 
 /* ── Answer buttons ───────────────────────────────────── */
 .answer-wrap{
@@ -417,7 +489,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 .card-eg-en{font-size:11px;color:var(--tx3);text-align:center;margin-top:3px;line-height:1.5}
 .card-note{
   font-size:11px;color:var(--ac-tx);text-align:center;line-height:1.55;
-  background:var(--ac-dim);border:1px solid rgba(242,100,25,.15);
+  background:var(--ac-dim);border:1px solid rgba(88,204,2,.15);
   border-radius:10px;padding:8px 12px;margin-top:4px;
 }
 
@@ -491,7 +563,7 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .lang-pill:active{transform:scale(.94)}
 .lang-pill.active{
-  background:var(--ac-dim);border-color:rgba(242,100,25,.35);color:var(--ac-tx);
+  background:var(--ac-dim);border-color:rgba(88,204,2,.35);color:var(--ac-tx);
 }
 
 /* ── Reduced motion ───────────────────────────────────── */
@@ -640,10 +712,35 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   <div class="choice-panel" id="choicePanel">
     <div class="choice-mode-lbl" id="choiceModeLbl">What is this in Italian?</div>
     <div class="choice-prompt" id="choicePrompt">—</div>
+    <div class="choice-listen-icon" id="choiceListenIcon" onclick="replayAudio()">🔊</div>
+    <div class="choice-listen-skip" id="choiceListenSkip" onclick="skipListen()">Can't listen now</div>
     <div class="choice-grid" id="choiceGrid"></div>
+    <button class="submit-btn choice-check-btn" id="choiceCheckBtn" onclick="confirmChoiceAnswer()" disabled>Check</button>
     <div class="choice-replay" id="choiceReplay" style="display:none;text-align:center">
       <span class="speak-link" onclick="replayAudio()">🔊 Hear it again</span>
     </div>
+  </div>
+
+  <!-- Match panel (Tap the matching pairs) -->
+  <div class="match-panel" id="matchPanel">
+    <div class="choice-mode-lbl">Tap the matching pairs</div>
+    <div class="match-grid">
+      <div class="match-col" id="matchColLeft"></div>
+      <div class="match-col" id="matchColRight"></div>
+    </div>
+  </div>
+
+  <!-- Speak panel (Repeat after) -->
+  <div class="speak-panel" id="speakPanel">
+    <div class="choice-mode-lbl">Repeat after Mimi</div>
+    <div class="speak-mascot">🦉</div>
+    <div class="speak-bubble">
+      <span class="speak-bubble-icon" onclick="replayAudio()">🔊</span>
+      <span id="speakBubbleText">—</span>
+    </div>
+    <button class="speak-mic-btn" id="speakMicBtn" onclick="startSpeakRecognition()">🎤</button>
+    <div class="speak-status" id="speakStatus"></div>
+    <div class="choice-listen-skip" id="speakSkip" onclick="skipSpeak()" style="display:block">Can't speak now</div>
   </div>
 
   <!-- Continue button (shown after wrong answer) -->
@@ -1107,9 +1204,10 @@ function getQuestionType(card, state, forceEasy){
   if(forceEasy) return 'choice';
   var s    = state[card.id];
   var reps = s ? (s.reps || 0) : 0;
-  if(reps === 0) return 'choice';                          // brand new → easiest
-  if(reps === 1) return 'gap';                             // seen once → medium
+  if(reps === 0) return Math.random() < 0.25 ? 'listen' : 'choice'; // brand new → easiest
+  if(reps === 1) return Math.random() < 0.2  ? 'listen' : 'gap';    // seen once → medium
   if(reps === 2) return Math.random() < 0.5 ? 'gap' : 'type';
+  if(SpeechRecognitionImpl && Math.random() < 0.3) return 'speak';
   return 'type';                                           // well known → hardest
 }
 
@@ -1146,6 +1244,32 @@ function buildPracticeQueue(filterCat){
   return pool.slice(0, cap).map(function(c){ return { card:c, type:getQuestionType(c, state, false) }; });
 }
 
+function injectMatchRounds(queue){
+  var result = [];
+  var i = 0;
+  while(i < queue.length){
+    var hasGroup = queue[i].type === 'choice' && i + 3 < queue.length &&
+      queue[i+1].type === 'choice' && queue[i+2].type === 'choice' && queue[i+3].type === 'choice';
+    if(hasGroup && Math.random() < 0.4){
+      var group = queue.slice(i, i+4).map(function(it){ return it.card; });
+      result.push({ type:'match', cards:group });
+      i += 4;
+    } else {
+      result.push(queue[i]);
+      i += 1;
+    }
+  }
+  return result;
+}
+
+function countQueueCards(queue){
+  var total = 0;
+  queue.forEach(function(item){
+    total += item.type === 'match' ? item.cards.length : 1;
+  });
+  return total;
+}
+
 function shuffle(arr){
   for(var i=arr.length-1; i>0; i--){
     var j=Math.floor(Math.random()*(i+1)), t=arr[i]; arr[i]=arr[j]; arr[j]=t;
@@ -1168,6 +1292,7 @@ function goHome(){
 
 function exitStudy(){
   clearSpeedTimer();
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
   goHome();
 }
 
@@ -1255,10 +1380,11 @@ function handleMainCta(){
 function startSession(filterCat){
   var queue = buildAdaptiveQueue(filterCat);
   if(!queue.length){ startPractice(filterCat); return; }
+  queue = injectMatchRounds(queue);
 
   sess.queue        = queue;
   sess.cleared      = 0;
-  sess.sessionTotal = queue.length;
+  sess.sessionTotal = countQueueCards(queue);
   sess.got          = 0;
   sess.missed       = 0;
   sess.retries      = {};
@@ -1272,10 +1398,11 @@ function startSession(filterCat){
 function startPractice(filterCat){
   var queue = buildPracticeQueue(filterCat);
   if(!queue.length) return;
+  queue = injectMatchRounds(queue);
 
   sess.queue        = queue;
   sess.cleared      = 0;
-  sess.sessionTotal = queue.length;
+  sess.sessionTotal = countQueueCards(queue);
   sess.got          = 0;
   sess.missed       = 0;
   sess.retries      = {};
@@ -1290,19 +1417,24 @@ function showCurrentItem(){
   var item = sess.queue[0];
   if(!item){ endSession(); return; }
 
-  var card=item.card, type=item.type;
-
   document.getElementById('cardScene').style.display   = 'none';
   document.getElementById('inputPanel').style.display  = 'none';
   document.getElementById('choicePanel').style.display = 'none';
+  document.getElementById('matchPanel').style.display  = 'none';
+  document.getElementById('speakPanel').style.display  = 'none';
   document.getElementById('continueWrap').style.display= 'none';
 
   updateProg();
-  updateSessionBadge(type);
+  updateSessionBadge(item.type);
 
-  if(type === 'choice')     showChoiceCard(card, false);
-  else if(type === 'gap')   showGapCard(card);
-  else                      showTypeCard(card);
+  if(item.type === 'match'){ showMatchCard(item.cards); return; }
+
+  var card=item.card, type=item.type;
+  if(type === 'choice')      showChoiceCard(card, false);
+  else if(type === 'listen') showListenCard(card);
+  else if(type === 'gap')    showGapCard(card);
+  else if(type === 'speak')  showSpeakCard(card);
+  else                       showTypeCard(card);
 }
 
 function updateProg(){
@@ -1312,7 +1444,7 @@ function updateProg(){
 }
 
 function updateSessionBadge(type){
-  var labels = { choice:'4 Choices', gap:'Fill the Gap', type:'Type It', speed:'Speed' };
+  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed', match:'Matching', speak:'Speaking' };
   document.getElementById('qTypeBadge').textContent = labels[type] || '';
   var sEl = document.getElementById('sessStreak');
   if(sess.streak >= 3){
@@ -1372,12 +1504,18 @@ function continueSession(){
 /* ═══════════════════════════════════════════════════════════
    CHOICE CARD
 ═══════════════════════════════════════════════════════════ */
+var pendingChoice = null;
+
 function showChoiceCard(card, speedMode){
   var panel = document.getElementById('choicePanel');
   panel.style.display = 'flex';
   document.getElementById('choiceModeLbl').textContent = (speedMode?'⚡ ':'') + 'What is this in ' + LANGS[currentLang].name + '?';
+  document.getElementById('choicePrompt').style.display = 'block';
   document.getElementById('choicePrompt').textContent  = card.en;
+  document.getElementById('choiceListenIcon').style.display = 'none';
+  document.getElementById('choiceListenSkip').style.display = 'none';
   document.getElementById('choiceReplay').style.display = 'none';
+  pendingChoice = null;
 
   var pool = WORDS.filter(function(w){ return w.id !== card.id; });
   shuffle(pool);
@@ -1391,11 +1529,252 @@ function showChoiceCard(card, speedMode){
       + esc(opt.term) + '</button>';
   });
   document.getElementById('choiceGrid').innerHTML = html;
+
+  var checkBtn = document.getElementById('choiceCheckBtn');
+  checkBtn.style.display = speedMode ? 'none' : 'block';
+  checkBtn.disabled = true;
+}
+
+function showListenCard(card){
+  var panel = document.getElementById('choicePanel');
+  panel.style.display = 'flex';
+  document.getElementById('choiceModeLbl').textContent = '🎧 What do you hear?';
+  document.getElementById('choicePrompt').style.display = 'none';
+  document.getElementById('choicePrompt').textContent = '';
+  document.getElementById('choiceListenIcon').style.display = 'flex';
+  document.getElementById('choiceListenSkip').style.display = 'block';
+  document.getElementById('choiceReplay').style.display = 'none';
+  pendingChoice = null;
+
+  var pool = WORDS.filter(function(w){ return w.id !== card.id; });
+  shuffle(pool);
+  var options = [card].concat(pool.slice(0, 3));
+  shuffle(options);
+
+  var html = '';
+  options.forEach(function(opt, i){
+    html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+',false)">'
+      + esc(opt.term) + '</button>';
+  });
+  document.getElementById('choiceGrid').innerHTML = html;
+
+  var checkBtn = document.getElementById('choiceCheckBtn');
+  checkBtn.style.display = 'block';
+  checkBtn.disabled = true;
+
+  speak(card.term);
+}
+
+function skipListen(){
+  var item = sess.queue[0];
+  document.getElementById('choiceListenIcon').style.display = 'none';
+  document.getElementById('choiceListenSkip').style.display = 'none';
+  document.getElementById('choicePrompt').style.display = 'block';
+  if(item) document.getElementById('choicePrompt').textContent = item.card.en;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MATCH ROUND (Tap the matching pairs)
+═══════════════════════════════════════════════════════════ */
+var matchState = null;
+
+function showMatchCard(cards){
+  document.getElementById('matchPanel').style.display = 'flex';
+
+  var lefts  = cards.map(function(c){ return { id:c.id, label:c.en }; });
+  var rights = cards.map(function(c){ return { id:c.id, label:c.term }; });
+  shuffle(lefts); shuffle(rights);
+
+  matchState = { cards:cards, lefts:lefts, rights:rights, selLeft:null, selRight:null, matched:{} };
+  renderMatchCols();
+}
+
+function matchPillClass(id, selId){
+  var ms = matchState;
+  var cls = 'match-pill';
+  if(ms.matched[id]) cls += ' matched';
+  else if(selId === id) cls += ' selected';
+  return cls;
+}
+
+function renderMatchCols(){
+  var ms = matchState;
+  var leftHtml = ms.lefts.map(function(item){
+    var cls = matchPillClass(item.id, ms.selLeft);
+    return '<button class="'+cls+'" id="mL'+item.id+'" '+(ms.matched[item.id]?'disabled':'')
+      + ' onclick="tapMatch(\'left\','+item.id+')">'+esc(item.label)+'</button>';
+  }).join('');
+  var rightHtml = ms.rights.map(function(item){
+    var cls = matchPillClass(item.id, ms.selRight);
+    return '<button class="'+cls+'" id="mR'+item.id+'" '+(ms.matched[item.id]?'disabled':'')
+      + ' onclick="tapMatch(\'right\','+item.id+')">'+esc(item.label)+'</button>';
+  }).join('');
+  document.getElementById('matchColLeft').innerHTML  = leftHtml;
+  document.getElementById('matchColRight').innerHTML = rightHtml;
+}
+
+function tapMatch(side, id){
+  var ms = matchState;
+  if(!ms || ms.matched[id]) return;
+
+  if(side === 'left') ms.selLeft  = (ms.selLeft  === id) ? null : id;
+  else                 ms.selRight = (ms.selRight === id) ? null : id;
+  renderMatchCols();
+
+  if(ms.selLeft == null || ms.selRight == null) return;
+
+  if(ms.selLeft === ms.selRight){
+    ms.matched[ms.selLeft] = true;
+    ms.selLeft = null; ms.selRight = null;
+    renderMatchCols();
+    if(Object.keys(ms.matched).length === ms.cards.length){
+      setTimeout(completeMatchRound, 450);
+    }
+  } else {
+    markMatchWrong(ms.selLeft, ms.selRight);
+    ms.selLeft = null; ms.selRight = null;
+    setTimeout(renderMatchCols, 450);
+  }
+}
+
+function markMatchWrong(leftId, rightId){
+  var lb = document.getElementById('mL'+leftId);
+  var rb = document.getElementById('mR'+rightId);
+  if(lb) lb.classList.add('wrong');
+  if(rb) rb.classList.add('wrong');
+}
+
+function completeMatchRound(){
+  var ms = matchState;
+  if(!ms) return;
+  var cards = ms.cards;
+
+  var state = loadState();
+  cards.forEach(function(c){ state[c.id] = sm2(state[c.id] || {}, 5); });
+  saveState(state);
+
+  sess.queue.shift();
+  sess.cleared += cards.length;
+  sess.got     += cards.length;
+  sess.streak  += cards.length;
+  matchState = null;
+
+  setTimeout(function(){ showCurrentItem(); }, 300);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPEAK (Repeat after [mascot])
+═══════════════════════════════════════════════════════════ */
+var speakRecognizer = null;
+var speakTargetCard = null;
+
+function showSpeakCard(card){
+  document.getElementById('speakPanel').style.display = 'flex';
+  speakTargetCard = card;
+
+  var phrase = card.eg || card.term;
+  document.getElementById('speakBubbleText').textContent = phrase;
+  var statusEl = document.getElementById('speakStatus');
+  statusEl.textContent = '';
+  statusEl.classList.remove('correct','almost','wrong');
+  document.getElementById('speakMicBtn').classList.remove('listening');
+
+  speak(phrase);
+}
+
+function startSpeakRecognition(){
+  if(!SpeechRecognitionImpl || !speakTargetCard) return;
+  var card    = speakTargetCard;
+  var phrase  = card.eg || card.term;
+  var micBtn  = document.getElementById('speakMicBtn');
+  var statusEl = document.getElementById('speakStatus');
+
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
+
+  var rec = new SpeechRecognitionImpl();
+  speakRecognizer = rec;
+  rec.lang = (LANGS[currentLang] && LANGS[currentLang].tts) || 'it-IT';
+  rec.maxAlternatives = 1;
+  rec.interimResults = false;
+
+  micBtn.classList.add('listening');
+  statusEl.classList.remove('correct','almost','wrong');
+  statusEl.textContent = 'Listening…';
+
+  rec.onresult = function(e){
+    var transcript = (e.results && e.results[0] && e.results[0][0]) ? e.results[0][0].transcript : '';
+    gradeSpeakAttempt(card, phrase, transcript);
+  };
+  rec.onerror = function(){
+    micBtn.classList.remove('listening');
+    statusEl.classList.add('wrong');
+    statusEl.textContent = "Didn't catch that — try again";
+  };
+  rec.onend = function(){
+    micBtn.classList.remove('listening');
+  };
+
+  try{ rec.start(); }
+  catch(e){
+    micBtn.classList.remove('listening');
+    statusEl.classList.add('wrong');
+    statusEl.textContent = "Couldn't start the microphone";
+  }
+}
+
+function gradeSpeakAttempt(card, phrase, transcript){
+  var statusEl = document.getElementById('speakStatus');
+  var said   = normalise(transcript);
+  var target = normalise(phrase);
+  var dist      = levenshtein(said, target);
+  var threshold = typoThreshold(target) + Math.max(0, Math.floor(target.length / 8));
+  var isExact   = said === target;
+  var isAlmost  = !isExact && dist <= threshold;
+
+  speak(card.term);
+  statusEl.classList.remove('correct','almost','wrong');
+
+  if(isExact || isAlmost){
+    statusEl.textContent = isExact ? 'Perfect! ✓' : 'Close enough! ✓';
+    statusEl.classList.add(isExact ? 'correct' : 'almost');
+    setTimeout(function(){ onCorrect(card, isAlmost ? 4 : 5); }, 700);
+  } else {
+    statusEl.textContent = 'You said: "' + transcript + '"';
+    statusEl.classList.add('wrong');
+    setTimeout(function(){ onWrong(card); }, 900);
+  }
+}
+
+function skipSpeak(){
+  if(!sess.queue.length) return;
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
+  sess.queue[0] = { card: sess.queue[0].card, type:'choice' };
+  showCurrentItem();
 }
 
 function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
+  if(speedMode){
+    gradeChoiceAnswer(btnIdx, correctId, chosenId, true);
+    return;
+  }
   var btns = document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
-  btns.forEach(function(b){ b.disabled = true; });
+  btns.forEach(function(b){ b.classList.remove('selected'); });
+  btns[btnIdx].classList.add('selected');
+  pendingChoice = { btnIdx:btnIdx, correctId:correctId, chosenId:chosenId };
+  document.getElementById('choiceCheckBtn').disabled = false;
+}
+
+function confirmChoiceAnswer(){
+  if(!pendingChoice) return;
+  var p = pendingChoice;
+  pendingChoice = null;
+  document.getElementById('choiceCheckBtn').disabled = true;
+  gradeChoiceAnswer(p.btnIdx, p.correctId, p.chosenId, false);
+}
+
+function gradeChoiceAnswer(btnIdx, correctId, chosenId, speedMode){
+  var btns = document.getElementById('choiceGrid').querySelectorAll('.choice-btn');
+  btns.forEach(function(b){ b.disabled = true; b.classList.remove('selected'); });
 
   var isCorrect = (chosenId === correctId);
   btns[btnIdx].classList.add(isCorrect ? 'correct' : 'wrong');
@@ -1576,6 +1955,7 @@ function typoThreshold(word){
 var AK = 'lk_audio';
 var audioOn = (localStorage.getItem(AK) !== 'off');
 var lastSpoken = '';
+var SpeechRecognitionImpl = (typeof window !== 'undefined') ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 function speak(text){
   if(!text || !audioOn || typeof window === 'undefined' || !window.speechSynthesis) return;
