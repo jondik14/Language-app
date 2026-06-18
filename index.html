@@ -361,6 +361,22 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 .choice-btn.reveal{background:var(--ok-dim);border-color:rgba(74,222,128,.4);color:var(--ok)}
 .choice-btn:disabled{opacity:.6;pointer-events:none}
 .choice-check-btn{margin-top:2px}
+.choice-listen-icon{
+  width:84px;height:84px;margin:4px auto 0;
+  background:var(--blue);color:#fff;
+  border-radius:22px;
+  display:none;align-items:center;justify-content:center;
+  font-size:34px;
+  -webkit-user-select:none;user-select:none;
+  transition:transform .2s var(--spring);
+}
+.choice-listen-icon:active{transform:scale(.93)}
+.choice-listen-skip{
+  display:none;text-align:center;margin-top:-2px;
+  font-size:12px;font-weight:700;color:var(--tx3);
+  -webkit-user-select:none;user-select:none;
+}
+.choice-listen-skip:active{opacity:.6}
 
 /* ── Answer buttons ───────────────────────────────────── */
 .answer-wrap{
@@ -643,6 +659,8 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
   <div class="choice-panel" id="choicePanel">
     <div class="choice-mode-lbl" id="choiceModeLbl">What is this in Italian?</div>
     <div class="choice-prompt" id="choicePrompt">—</div>
+    <div class="choice-listen-icon" id="choiceListenIcon" onclick="replayAudio()">🔊</div>
+    <div class="choice-listen-skip" id="choiceListenSkip" onclick="skipListen()">Can't listen now</div>
     <div class="choice-grid" id="choiceGrid"></div>
     <button class="submit-btn choice-check-btn" id="choiceCheckBtn" onclick="confirmChoiceAnswer()" disabled>Check</button>
     <div class="choice-replay" id="choiceReplay" style="display:none;text-align:center">
@@ -1111,8 +1129,8 @@ function getQuestionType(card, state, forceEasy){
   if(forceEasy) return 'choice';
   var s    = state[card.id];
   var reps = s ? (s.reps || 0) : 0;
-  if(reps === 0) return 'choice';                          // brand new → easiest
-  if(reps === 1) return 'gap';                             // seen once → medium
+  if(reps === 0) return Math.random() < 0.25 ? 'listen' : 'choice'; // brand new → easiest
+  if(reps === 1) return Math.random() < 0.2  ? 'listen' : 'gap';    // seen once → medium
   if(reps === 2) return Math.random() < 0.5 ? 'gap' : 'type';
   return 'type';                                           // well known → hardest
 }
@@ -1305,6 +1323,7 @@ function showCurrentItem(){
   updateSessionBadge(type);
 
   if(type === 'choice')     showChoiceCard(card, false);
+  else if(type === 'listen') showListenCard(card);
   else if(type === 'gap')   showGapCard(card);
   else                      showTypeCard(card);
 }
@@ -1316,7 +1335,7 @@ function updateProg(){
 }
 
 function updateSessionBadge(type){
-  var labels = { choice:'4 Choices', gap:'Fill the Gap', type:'Type It', speed:'Speed' };
+  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed' };
   document.getElementById('qTypeBadge').textContent = labels[type] || '';
   var sEl = document.getElementById('sessStreak');
   if(sess.streak >= 3){
@@ -1382,7 +1401,10 @@ function showChoiceCard(card, speedMode){
   var panel = document.getElementById('choicePanel');
   panel.style.display = 'flex';
   document.getElementById('choiceModeLbl').textContent = (speedMode?'⚡ ':'') + 'What is this in ' + LANGS[currentLang].name + '?';
+  document.getElementById('choicePrompt').style.display = 'block';
   document.getElementById('choicePrompt').textContent  = card.en;
+  document.getElementById('choiceListenIcon').style.display = 'none';
+  document.getElementById('choiceListenSkip').style.display = 'none';
   document.getElementById('choiceReplay').style.display = 'none';
   pendingChoice = null;
 
@@ -1402,6 +1424,44 @@ function showChoiceCard(card, speedMode){
   var checkBtn = document.getElementById('choiceCheckBtn');
   checkBtn.style.display = speedMode ? 'none' : 'block';
   checkBtn.disabled = true;
+}
+
+function showListenCard(card){
+  var panel = document.getElementById('choicePanel');
+  panel.style.display = 'flex';
+  document.getElementById('choiceModeLbl').textContent = '🎧 What do you hear?';
+  document.getElementById('choicePrompt').style.display = 'none';
+  document.getElementById('choicePrompt').textContent = '';
+  document.getElementById('choiceListenIcon').style.display = 'flex';
+  document.getElementById('choiceListenSkip').style.display = 'block';
+  document.getElementById('choiceReplay').style.display = 'none';
+  pendingChoice = null;
+
+  var pool = WORDS.filter(function(w){ return w.id !== card.id; });
+  shuffle(pool);
+  var options = [card].concat(pool.slice(0, 3));
+  shuffle(options);
+
+  var html = '';
+  options.forEach(function(opt, i){
+    html += '<button class="choice-btn" onclick="chooseAnswer('+i+','+card.id+','+opt.id+',false)">'
+      + esc(opt.term) + '</button>';
+  });
+  document.getElementById('choiceGrid').innerHTML = html;
+
+  var checkBtn = document.getElementById('choiceCheckBtn');
+  checkBtn.style.display = 'block';
+  checkBtn.disabled = true;
+
+  speak(card.term);
+}
+
+function skipListen(){
+  var item = sess.queue[0];
+  document.getElementById('choiceListenIcon').style.display = 'none';
+  document.getElementById('choiceListenSkip').style.display = 'none';
+  document.getElementById('choicePrompt').style.display = 'block';
+  if(item) document.getElementById('choicePrompt').textContent = item.card.en;
 }
 
 function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
