@@ -378,6 +378,28 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 }
 .choice-listen-skip:active{opacity:.6}
 
+/* ── Match panel (Tap the matching pairs) ─────────────── */
+.match-panel{
+  display:none;flex:1;flex-direction:column;
+  justify-content:center;gap:14px;
+  padding:0 20px;
+}
+.match-grid{display:flex;gap:10px}
+.match-col{flex:1;display:flex;flex-direction:column;gap:9px}
+.match-pill{
+  width:100%;padding:13px 14px;
+  background:var(--s1);border:1.5px solid var(--bd2);
+  border-radius:999px;
+  font-size:13px;font-weight:700;color:var(--tx);text-align:center;
+  transition:transform .2s var(--spring),background .15s,border-color .15s;
+  -webkit-user-select:none;user-select:none;line-height:1.3;
+}
+.match-pill:active:not(:disabled){transform:scale(.95)}
+.match-pill.selected{background:var(--blue-dim);border-color:var(--blue);color:var(--blue-tx)}
+.match-pill.matched{background:var(--ok-dim);border-color:rgba(74,222,128,.4);color:var(--ok);opacity:.7}
+.match-pill.wrong{background:var(--err-dim);border-color:rgba(248,113,113,.4);color:var(--err)}
+.match-pill:disabled{pointer-events:none}
+
 /* ── Answer buttons ───────────────────────────────────── */
 .answer-wrap{
   padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 20px);
@@ -665,6 +687,15 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
     <button class="submit-btn choice-check-btn" id="choiceCheckBtn" onclick="confirmChoiceAnswer()" disabled>Check</button>
     <div class="choice-replay" id="choiceReplay" style="display:none;text-align:center">
       <span class="speak-link" onclick="replayAudio()">🔊 Hear it again</span>
+    </div>
+  </div>
+
+  <!-- Match panel (Tap the matching pairs) -->
+  <div class="match-panel" id="matchPanel">
+    <div class="choice-mode-lbl">Tap the matching pairs</div>
+    <div class="match-grid">
+      <div class="match-col" id="matchColLeft"></div>
+      <div class="match-col" id="matchColRight"></div>
     </div>
   </div>
 
@@ -1168,6 +1199,32 @@ function buildPracticeQueue(filterCat){
   return pool.slice(0, cap).map(function(c){ return { card:c, type:getQuestionType(c, state, false) }; });
 }
 
+function injectMatchRounds(queue){
+  var result = [];
+  var i = 0;
+  while(i < queue.length){
+    var hasGroup = queue[i].type === 'choice' && i + 3 < queue.length &&
+      queue[i+1].type === 'choice' && queue[i+2].type === 'choice' && queue[i+3].type === 'choice';
+    if(hasGroup && Math.random() < 0.4){
+      var group = queue.slice(i, i+4).map(function(it){ return it.card; });
+      result.push({ type:'match', cards:group });
+      i += 4;
+    } else {
+      result.push(queue[i]);
+      i += 1;
+    }
+  }
+  return result;
+}
+
+function countQueueCards(queue){
+  var total = 0;
+  queue.forEach(function(item){
+    total += item.type === 'match' ? item.cards.length : 1;
+  });
+  return total;
+}
+
 function shuffle(arr){
   for(var i=arr.length-1; i>0; i--){
     var j=Math.floor(Math.random()*(i+1)), t=arr[i]; arr[i]=arr[j]; arr[j]=t;
@@ -1277,10 +1334,11 @@ function handleMainCta(){
 function startSession(filterCat){
   var queue = buildAdaptiveQueue(filterCat);
   if(!queue.length){ startPractice(filterCat); return; }
+  queue = injectMatchRounds(queue);
 
   sess.queue        = queue;
   sess.cleared      = 0;
-  sess.sessionTotal = queue.length;
+  sess.sessionTotal = countQueueCards(queue);
   sess.got          = 0;
   sess.missed       = 0;
   sess.retries      = {};
@@ -1294,10 +1352,11 @@ function startSession(filterCat){
 function startPractice(filterCat){
   var queue = buildPracticeQueue(filterCat);
   if(!queue.length) return;
+  queue = injectMatchRounds(queue);
 
   sess.queue        = queue;
   sess.cleared      = 0;
-  sess.sessionTotal = queue.length;
+  sess.sessionTotal = countQueueCards(queue);
   sess.got          = 0;
   sess.missed       = 0;
   sess.retries      = {};
@@ -1312,16 +1371,18 @@ function showCurrentItem(){
   var item = sess.queue[0];
   if(!item){ endSession(); return; }
 
-  var card=item.card, type=item.type;
-
   document.getElementById('cardScene').style.display   = 'none';
   document.getElementById('inputPanel').style.display  = 'none';
   document.getElementById('choicePanel').style.display = 'none';
+  document.getElementById('matchPanel').style.display  = 'none';
   document.getElementById('continueWrap').style.display= 'none';
 
   updateProg();
-  updateSessionBadge(type);
+  updateSessionBadge(item.type);
 
+  if(item.type === 'match'){ showMatchCard(item.cards); return; }
+
+  var card=item.card, type=item.type;
   if(type === 'choice')     showChoiceCard(card, false);
   else if(type === 'listen') showListenCard(card);
   else if(type === 'gap')   showGapCard(card);
@@ -1335,7 +1396,7 @@ function updateProg(){
 }
 
 function updateSessionBadge(type){
-  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed' };
+  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed', match:'Matching' };
   document.getElementById('qTypeBadge').textContent = labels[type] || '';
   var sEl = document.getElementById('sessStreak');
   if(sess.streak >= 3){
@@ -1462,6 +1523,95 @@ function skipListen(){
   document.getElementById('choiceListenSkip').style.display = 'none';
   document.getElementById('choicePrompt').style.display = 'block';
   if(item) document.getElementById('choicePrompt').textContent = item.card.en;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MATCH ROUND (Tap the matching pairs)
+═══════════════════════════════════════════════════════════ */
+var matchState = null;
+
+function showMatchCard(cards){
+  document.getElementById('matchPanel').style.display = 'flex';
+
+  var lefts  = cards.map(function(c){ return { id:c.id, label:c.en }; });
+  var rights = cards.map(function(c){ return { id:c.id, label:c.term }; });
+  shuffle(lefts); shuffle(rights);
+
+  matchState = { cards:cards, lefts:lefts, rights:rights, selLeft:null, selRight:null, matched:{} };
+  renderMatchCols();
+}
+
+function matchPillClass(id, selId){
+  var ms = matchState;
+  var cls = 'match-pill';
+  if(ms.matched[id]) cls += ' matched';
+  else if(selId === id) cls += ' selected';
+  return cls;
+}
+
+function renderMatchCols(){
+  var ms = matchState;
+  var leftHtml = ms.lefts.map(function(item){
+    var cls = matchPillClass(item.id, ms.selLeft);
+    return '<button class="'+cls+'" id="mL'+item.id+'" '+(ms.matched[item.id]?'disabled':'')
+      + ' onclick="tapMatch(\'left\','+item.id+')">'+esc(item.label)+'</button>';
+  }).join('');
+  var rightHtml = ms.rights.map(function(item){
+    var cls = matchPillClass(item.id, ms.selRight);
+    return '<button class="'+cls+'" id="mR'+item.id+'" '+(ms.matched[item.id]?'disabled':'')
+      + ' onclick="tapMatch(\'right\','+item.id+')">'+esc(item.label)+'</button>';
+  }).join('');
+  document.getElementById('matchColLeft').innerHTML  = leftHtml;
+  document.getElementById('matchColRight').innerHTML = rightHtml;
+}
+
+function tapMatch(side, id){
+  var ms = matchState;
+  if(!ms || ms.matched[id]) return;
+
+  if(side === 'left') ms.selLeft  = (ms.selLeft  === id) ? null : id;
+  else                 ms.selRight = (ms.selRight === id) ? null : id;
+  renderMatchCols();
+
+  if(ms.selLeft == null || ms.selRight == null) return;
+
+  if(ms.selLeft === ms.selRight){
+    ms.matched[ms.selLeft] = true;
+    ms.selLeft = null; ms.selRight = null;
+    renderMatchCols();
+    if(Object.keys(ms.matched).length === ms.cards.length){
+      setTimeout(completeMatchRound, 450);
+    }
+  } else {
+    markMatchWrong(ms.selLeft, ms.selRight);
+    ms.selLeft = null; ms.selRight = null;
+    setTimeout(renderMatchCols, 450);
+  }
+}
+
+function markMatchWrong(leftId, rightId){
+  var lb = document.getElementById('mL'+leftId);
+  var rb = document.getElementById('mR'+rightId);
+  if(lb) lb.classList.add('wrong');
+  if(rb) rb.classList.add('wrong');
+}
+
+function completeMatchRound(){
+  var ms = matchState;
+  if(!ms) return;
+  var cards = ms.cards;
+
+  var state = loadState();
+  cards.forEach(function(c){ state[c.id] = sm2(state[c.id] || {}, 5); });
+  saveState(state);
+
+  sess.queue.shift();
+  sess.cleared += cards.length;
+  sess.got     += cards.length;
+  sess.streak  += cards.length;
+  matchState = null;
+
+  setTimeout(function(){ showCurrentItem(); }, 300);
 }
 
 function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
