@@ -400,6 +400,37 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
 .match-pill.wrong{background:var(--err-dim);border-color:rgba(248,113,113,.4);color:var(--err)}
 .match-pill:disabled{pointer-events:none}
 
+/* ── Speak panel (Repeat after) ───────────────────────── */
+.speak-panel{
+  display:none;flex:1;flex-direction:column;
+  justify-content:center;align-items:center;gap:14px;
+  padding:0 20px;
+}
+.speak-mascot{font-size:60px;line-height:1}
+.speak-bubble{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:16px;padding:14px 18px;
+  display:flex;align-items:center;gap:10px;
+  font-size:16px;font-weight:700;color:var(--tx);text-align:center;
+  max-width:100%;
+}
+.speak-bubble-icon{font-size:18px;-webkit-user-select:none;user-select:none}
+.speak-bubble-icon:active{opacity:.6}
+.speak-mic-btn{
+  width:76px;height:76px;border-radius:50%;
+  background:var(--blue);color:#fff;font-size:30px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s var(--spring),background .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.speak-mic-btn:active{transform:scale(.92)}
+.speak-mic-btn.listening{background:var(--err);animation:speakPulse 1s infinite}
+@keyframes speakPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.speak-status{font-size:13px;font-weight:700;color:var(--tx2);min-height:18px;text-align:center}
+.speak-status.correct{color:var(--ok)}
+.speak-status.almost{color:var(--warn)}
+.speak-status.wrong{color:var(--err)}
+
 /* ── Answer buttons ───────────────────────────────────── */
 .answer-wrap{
   padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 20px);
@@ -697,6 +728,19 @@ button{font-family:var(--font);cursor:pointer;border:none;background:none;color:
       <div class="match-col" id="matchColLeft"></div>
       <div class="match-col" id="matchColRight"></div>
     </div>
+  </div>
+
+  <!-- Speak panel (Repeat after) -->
+  <div class="speak-panel" id="speakPanel">
+    <div class="choice-mode-lbl">Repeat after Mimi</div>
+    <div class="speak-mascot">🦉</div>
+    <div class="speak-bubble">
+      <span class="speak-bubble-icon" onclick="replayAudio()">🔊</span>
+      <span id="speakBubbleText">—</span>
+    </div>
+    <button class="speak-mic-btn" id="speakMicBtn" onclick="startSpeakRecognition()">🎤</button>
+    <div class="speak-status" id="speakStatus"></div>
+    <div class="choice-listen-skip" id="speakSkip" onclick="skipSpeak()" style="display:block">Can't speak now</div>
   </div>
 
   <!-- Continue button (shown after wrong answer) -->
@@ -1163,6 +1207,7 @@ function getQuestionType(card, state, forceEasy){
   if(reps === 0) return Math.random() < 0.25 ? 'listen' : 'choice'; // brand new → easiest
   if(reps === 1) return Math.random() < 0.2  ? 'listen' : 'gap';    // seen once → medium
   if(reps === 2) return Math.random() < 0.5 ? 'gap' : 'type';
+  if(SpeechRecognitionImpl && Math.random() < 0.3) return 'speak';
   return 'type';                                           // well known → hardest
 }
 
@@ -1247,6 +1292,7 @@ function goHome(){
 
 function exitStudy(){
   clearSpeedTimer();
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
   goHome();
 }
 
@@ -1375,6 +1421,7 @@ function showCurrentItem(){
   document.getElementById('inputPanel').style.display  = 'none';
   document.getElementById('choicePanel').style.display = 'none';
   document.getElementById('matchPanel').style.display  = 'none';
+  document.getElementById('speakPanel').style.display  = 'none';
   document.getElementById('continueWrap').style.display= 'none';
 
   updateProg();
@@ -1383,10 +1430,11 @@ function showCurrentItem(){
   if(item.type === 'match'){ showMatchCard(item.cards); return; }
 
   var card=item.card, type=item.type;
-  if(type === 'choice')     showChoiceCard(card, false);
+  if(type === 'choice')      showChoiceCard(card, false);
   else if(type === 'listen') showListenCard(card);
-  else if(type === 'gap')   showGapCard(card);
-  else                      showTypeCard(card);
+  else if(type === 'gap')    showGapCard(card);
+  else if(type === 'speak')  showSpeakCard(card);
+  else                       showTypeCard(card);
 }
 
 function updateProg(){
@@ -1396,7 +1444,7 @@ function updateProg(){
 }
 
 function updateSessionBadge(type){
-  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed', match:'Matching' };
+  var labels = { choice:'4 Choices', listen:'Listening', gap:'Fill the Gap', type:'Type It', speed:'Speed', match:'Matching', speak:'Speaking' };
   document.getElementById('qTypeBadge').textContent = labels[type] || '';
   var sEl = document.getElementById('sessStreak');
   if(sess.streak >= 3){
@@ -1614,6 +1662,96 @@ function completeMatchRound(){
   setTimeout(function(){ showCurrentItem(); }, 300);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SPEAK (Repeat after [mascot])
+═══════════════════════════════════════════════════════════ */
+var speakRecognizer = null;
+var speakTargetCard = null;
+
+function showSpeakCard(card){
+  document.getElementById('speakPanel').style.display = 'flex';
+  speakTargetCard = card;
+
+  var phrase = card.eg || card.term;
+  document.getElementById('speakBubbleText').textContent = phrase;
+  var statusEl = document.getElementById('speakStatus');
+  statusEl.textContent = '';
+  statusEl.classList.remove('correct','almost','wrong');
+  document.getElementById('speakMicBtn').classList.remove('listening');
+
+  speak(phrase);
+}
+
+function startSpeakRecognition(){
+  if(!SpeechRecognitionImpl || !speakTargetCard) return;
+  var card    = speakTargetCard;
+  var phrase  = card.eg || card.term;
+  var micBtn  = document.getElementById('speakMicBtn');
+  var statusEl = document.getElementById('speakStatus');
+
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
+
+  var rec = new SpeechRecognitionImpl();
+  speakRecognizer = rec;
+  rec.lang = (LANGS[currentLang] && LANGS[currentLang].tts) || 'it-IT';
+  rec.maxAlternatives = 1;
+  rec.interimResults = false;
+
+  micBtn.classList.add('listening');
+  statusEl.classList.remove('correct','almost','wrong');
+  statusEl.textContent = 'Listening…';
+
+  rec.onresult = function(e){
+    var transcript = (e.results && e.results[0] && e.results[0][0]) ? e.results[0][0].transcript : '';
+    gradeSpeakAttempt(card, phrase, transcript);
+  };
+  rec.onerror = function(){
+    micBtn.classList.remove('listening');
+    statusEl.classList.add('wrong');
+    statusEl.textContent = "Didn't catch that — try again";
+  };
+  rec.onend = function(){
+    micBtn.classList.remove('listening');
+  };
+
+  try{ rec.start(); }
+  catch(e){
+    micBtn.classList.remove('listening');
+    statusEl.classList.add('wrong');
+    statusEl.textContent = "Couldn't start the microphone";
+  }
+}
+
+function gradeSpeakAttempt(card, phrase, transcript){
+  var statusEl = document.getElementById('speakStatus');
+  var said   = normalise(transcript);
+  var target = normalise(phrase);
+  var dist      = levenshtein(said, target);
+  var threshold = typoThreshold(target) + Math.max(0, Math.floor(target.length / 8));
+  var isExact   = said === target;
+  var isAlmost  = !isExact && dist <= threshold;
+
+  speak(card.term);
+  statusEl.classList.remove('correct','almost','wrong');
+
+  if(isExact || isAlmost){
+    statusEl.textContent = isExact ? 'Perfect! ✓' : 'Close enough! ✓';
+    statusEl.classList.add(isExact ? 'correct' : 'almost');
+    setTimeout(function(){ onCorrect(card, isAlmost ? 4 : 5); }, 700);
+  } else {
+    statusEl.textContent = 'You said: "' + transcript + '"';
+    statusEl.classList.add('wrong');
+    setTimeout(function(){ onWrong(card); }, 900);
+  }
+}
+
+function skipSpeak(){
+  if(!sess.queue.length) return;
+  if(speakRecognizer){ try{ speakRecognizer.abort(); }catch(e){} }
+  sess.queue[0] = { card: sess.queue[0].card, type:'choice' };
+  showCurrentItem();
+}
+
 function chooseAnswer(btnIdx, correctId, chosenId, speedMode){
   if(speedMode){
     gradeChoiceAnswer(btnIdx, correctId, chosenId, true);
@@ -1817,6 +1955,7 @@ function typoThreshold(word){
 var AK = 'lk_audio';
 var audioOn = (localStorage.getItem(AK) !== 'off');
 var lastSpoken = '';
+var SpeechRecognitionImpl = (typeof window !== 'undefined') ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 function speak(text){
   if(!text || !audioOn || typeof window === 'undefined' || !window.speechSynthesis) return;
